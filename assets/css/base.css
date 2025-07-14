@@ -31,7 +31,7 @@
     padding: 10px 20px;
     height: fit-content;
     background-color: var(--color-dark-blue);
-    z-index: 10; /* Увеличиваем z-index, чтобы header был всегда сверху */
+    z-index: 10;
 }
 
 .game-header img {

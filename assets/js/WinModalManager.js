@@ -14,12 +14,14 @@ class WinModalManager {
 
         this.initialized = true;
 
-        // Добавляем обработчик для кнопки "CLAIM BONUS"
+        // Добавляем обработчик для кнопки "TRY AGAIN"
         const claimButton = document.getElementById('claim-bonus-btn');
         if (claimButton) {
-            claimButton.addEventListener('click', () => {
+            this.clickHandler = () => {
                 this.hideWinModal();
-            });
+                this.restartGame();
+            };
+            claimButton.addEventListener('click', this.clickHandler);
         }
 
         console.log('WinModalManager инициализирован');
@@ -43,7 +45,7 @@ class WinModalManager {
 
         const winAmountElement = document.getElementById('win-amount');
         if (winAmountElement) {
-            winAmountElement.textContent = `${formattedWins}$ + 150FS`;
+            winAmountElement.textContent = `1000€`;
         }
 
         // Добавляем класс для анимации появления
@@ -69,15 +71,22 @@ class WinModalManager {
         }
     }
 
+    // Метод для перезапуска игры
+    restartGame() {
+        // Простая перезагрузка страницы
+        window.location.reload();
+    }
+
     // Очистка ресурсов
     cleanup() {
-        // Удаляем обработчики событий
+        // Сохраняем ссылку на обработчик для корректного удаления
         const claimButton = document.getElementById('claim-bonus-btn');
-        if (claimButton) {
-            claimButton.removeEventListener('click', this.hideWinModal);
+        if (claimButton && this.clickHandler) {
+            claimButton.removeEventListener('click', this.clickHandler);
         }
 
         this.initialized = false;
+        this.clickHandler = null;
     }
 }
 

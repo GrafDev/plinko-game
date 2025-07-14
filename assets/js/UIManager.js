@@ -40,12 +40,8 @@ class UIManager {
 
     // Метод для обновления отображения оставшихся шаров с учетом текущего выбора
     updateRemainingBalls() {
-        const balanceDisplay = document.getElementById('balance-display');
-        if (balanceDisplay) {
-            // Вычисляем, сколько шаров останется после ставки
-            const remainingAfterBet = Math.max(0, this.throwsLeft - this.ballCount);
-            balanceDisplay.textContent = `Balls remaining: ${remainingAfterBet}`;
-        }
+        // Убираем отображение "Balls remaining"
+        return;
     }
 
     initialize() {
@@ -59,6 +55,8 @@ class UIManager {
         this.createSliders();
         this.createDebugInput();
         this.setupBetButton();
+        this.setupResponsiveWins(); // Добавляем адаптивность для wins
+        this.setupResponsiveSliders(); // Добавляем адаптивность для слайдеров
 
         // Инициализируем менеджер модального окна
         this.winModalManager = new WinModalManager(this.game);
@@ -76,23 +74,8 @@ class UIManager {
     }
 
     createMoneyBetUI() {
-        // Проверяем, нет ли уже созданного элемента
-        const existingContainer = document.querySelector('.money-bet-container');
-        if (existingContainer) {
-            console.log('Money bet container already exists, skipping creation');
-            return;
-        }
-
-        const moneyBetContainer = document.createElement('div');
-        moneyBetContainer.className = 'money-bet-container';
-
-        const balanceDisplay = document.createElement('div');
-        balanceDisplay.id = 'balance-display';
-        balanceDisplay.className = 'balance-display';
-        balanceDisplay.textContent = `Шаров: ${this.throwsLeft}`;
-
-        moneyBetContainer.appendChild(balanceDisplay);
-        this.game.container.appendChild(moneyBetContainer);
+        // Скрываем этот блок - он не нужен
+        return;
     }
 
     createWinsDisplay() {
@@ -106,13 +89,17 @@ class UIManager {
         // Очищаем существующий контейнер
         winsContainer.innerHTML = '';
 
-        // Создаем элемент для отображения выигрыша
-        const winsDisplay = document.createElement('div');
-        winsDisplay.id = 'wins-display';
-        winsDisplay.className = 'balance-display'; // Используем тот же стиль, что и для баланса
-        winsDisplay.textContent = `Wins: $${this.winsAmount}`;
+        // Создаем красивый элемент для отображения выигрыша
+        const winsAmountSpan = document.createElement('span');
+        winsAmountSpan.className = 'wins-amount';
+        winsAmountSpan.textContent = `${this.winsAmount}€`;
 
-        winsContainer.appendChild(winsDisplay);
+        const winsLabelSpan = document.createElement('span');
+        winsLabelSpan.className = 'wins-label';
+        winsLabelSpan.textContent = 'WINS';
+
+        winsContainer.appendChild(winsAmountSpan);
+        winsContainer.appendChild(winsLabelSpan);
     }
 
     updateBalanceDisplay() {
@@ -156,16 +143,10 @@ class UIManager {
 
 
     updateThrowsAndWins() {
-        // Обновляем отображение оставшихся шаров
-        const balanceDisplay = document.getElementById('balance-display');
-        if (balanceDisplay) {
-            balanceDisplay.textContent = `Шаров: ${this.throwsLeft}`;
-        }
-
-        // Обновляем отображение суммы выигрыша
-        const winsDisplay = document.getElementById('wins-display');
-        if (winsDisplay) {
-            winsDisplay.textContent = `Wins: $${this.winsAmount}`;
+        // Обновляем красивое отображение суммы выигрыша
+        const winsAmountElement = document.querySelector('.wins-amount');
+        if (winsAmountElement) {
+            winsAmountElement.textContent = `${this.winsAmount}€`;
         }
     }
 
@@ -190,6 +171,11 @@ class UIManager {
         rowsLabel.textContent = 'Rows';
         rowsContainer.appendChild(rowsLabel);
 
+        const rowsValue = document.createElement('span');
+        rowsValue.className = 'slider-value';
+        rowsValue.textContent = initialRows;
+        rowsContainer.appendChild(rowsValue);
+
         const rowsSlider = document.createElement('input');
         rowsSlider.type = 'range';
         rowsSlider.className = 'slider';
@@ -213,15 +199,21 @@ class UIManager {
 
         const ballsLabel = document.createElement('label');
         ballsLabel.className = 'slider-label';
-        ballsLabel.textContent = 'Balls At Once';
+        ballsLabel.textContent = 'Balls';
         ballsContainer.appendChild(ballsLabel);
+
+        const ballsValue = document.createElement('span');
+        ballsValue.className = 'slider-value';
+        ballsValue.textContent = this.ballCount;
+        ballsContainer.appendChild(ballsValue);
 
         const ballsSlider = document.createElement('input');
         ballsSlider.type = 'range';
         ballsSlider.className = 'slider';
         ballsSlider.min = '1';
         ballsSlider.max = this.maxBallCount.toString();
-        ballsSlider.value = this.ballCount.toString();
+        // Переворачиваем значение: если ballCount = 1, то value = maxBallCount
+        ballsSlider.value = (this.maxBallCount - this.ballCount + 1).toString();
         ballsContainer.appendChild(ballsSlider);
 
         // Сохраняем ссылку на слайдер шаров
@@ -235,17 +227,22 @@ class UIManager {
 
         ballsSlider.addEventListener('input', function() {
             const previousCount = self.ballCount;
-            self.ballCount = parseInt(this.value, 10);
+            // Переворачиваем значение слайдера: если value = 1, то ballCount = maxBallCount
+            self.ballCount = self.maxBallCount - parseInt(this.value, 10) + 1;
 
             // Если выбранное количество шаров больше оставшихся, ограничиваем его
             if (self.ballCount > self.throwsLeft) {
                 self.ballCount = self.throwsLeft;
-                this.value = self.ballCount.toString();
+                // Обновляем значение слайдера с учетом переворота
+                this.value = (self.maxBallCount - self.ballCount + 1).toString();
             }
+
+            // Обновляем значение слайдера
+            ballsValue.textContent = self.ballCount;
 
             const betButton = document.getElementById('bet-button');
             if (betButton) {
-                betButton.textContent = `Bet (${self.ballCount})`;
+                betButton.textContent = `Bet`;
 
                 // Делаем кнопку неактивной, если нет оставшихся шаров
                 if (self.throwsLeft <= 0) {
@@ -261,6 +258,12 @@ class UIManager {
 
             // Обновляем отображение оставшихся шаров с учетом выбранного количества
             self.updateRemainingBalls();
+        });
+
+        // Добавляем обработчик для динамического обновления значения rows
+        rowsSlider.addEventListener('input', function() {
+            const currentRows = parseInt(this.value, 10);
+            rowsValue.textContent = currentRows;
         });
 
         rowsSlider.addEventListener('change', () => {
@@ -369,7 +372,7 @@ class UIManager {
         betButton.parentNode.replaceChild(newButton, betButton);
 
         newButton.className = 'bet-button';
-        newButton.textContent = `Bet (${this.ballCount})`;
+        newButton.textContent = `Bet`;
 
         if (this.throwsLeft <= 0) {
             newButton.disabled = true;
@@ -581,7 +584,7 @@ class UIManager {
         // Обновляем текст на кнопке ставки
         const betButton = document.getElementById('bet-button');
         if (betButton) {
-            betButton.textContent = `Bet (${this.ballCount})`;
+            betButton.textContent = `Bet`;
         }
 
         console.log('Слайдеры обновлены после завершения игры');
@@ -592,7 +595,98 @@ class UIManager {
         console.log('Индекс planTargetsBins сброшен');
     }
 
+
+    setupResponsiveWins() {
+        // Функция для перемещения wins в зависимости от размера экрана
+        const moveWins = () => {
+            const winsContainer = document.getElementById('wins-container');
+            const gameControls = document.querySelector('.game-controls');
+            const plinkoField = document.querySelector('.plinko-field');
+            
+            if (!winsContainer || !gameControls || !plinkoField) {
+                return;
+            }
+
+            if (window.innerWidth >= 768) {
+                // Для планшетов и десктопов - перемещаем wins в game-controls
+                if (winsContainer.parentNode !== gameControls) {
+                    gameControls.insertBefore(winsContainer, gameControls.firstChild);
+                }
+            } else {
+                // Для мобильных - оставляем в plinko-field
+                if (winsContainer.parentNode !== plinkoField) {
+                    // Находим правильное место - после plinko-game, но перед bins-container
+                    const plinkoGame = document.getElementById('plinko-game');
+                    const binsContainer = document.getElementById('bins-container');
+                    if (plinkoGame && binsContainer) {
+                        plinkoField.insertBefore(winsContainer, binsContainer);
+                    }
+                }
+            }
+        };
+
+        // Выполняем сразу
+        moveWins();
+        
+        // Добавляем обработчик изменения размера окна
+        window.addEventListener('resize', moveWins);
+        
+        // Сохраняем ссылку для очистки
+        this.responsiveWinsHandler = moveWins;
+    }
+
+    setupResponsiveSliders() {
+        // Функция для перемещения слайдеров и кнопки bet в зависимости от размера экрана
+        const moveControls = () => {
+            const slidersContainer = document.getElementById('sliders-container');
+            const betButton = document.getElementById('bet-button');
+            const gameHeader = document.querySelector('.game-header');
+            const gameControls = document.querySelector('.game-controls');
+            
+            if (!slidersContainer || !betButton || !gameHeader || !gameControls) {
+                return;
+            }
+
+            if (window.innerWidth >= 768) {
+                // Для планшетов и десктопов - перемещаем слайдеры и кнопку в game-header
+                if (slidersContainer.parentNode !== gameHeader) {
+                    gameHeader.appendChild(slidersContainer);
+                }
+                if (betButton.parentNode !== gameHeader) {
+                    gameHeader.appendChild(betButton);
+                }
+            } else {
+                // Для мобильных - оставляем в game-controls
+                if (slidersContainer.parentNode !== gameControls) {
+                    gameControls.appendChild(slidersContainer);
+                }
+                if (betButton.parentNode !== gameControls) {
+                    gameControls.appendChild(betButton);
+                }
+            }
+        };
+
+        // Выполняем сразу
+        moveControls();
+        
+        // Добавляем обработчик изменения размера окна
+        window.addEventListener('resize', moveControls);
+        
+        // Сохраняем ссылку для очистки
+        this.responsiveSlidersHandler = moveControls;
+    }
+
     cleanup() {
+        // Очищаем обработчики responsive
+        if (this.responsiveWinsHandler) {
+            window.removeEventListener('resize', this.responsiveWinsHandler);
+            this.responsiveWinsHandler = null;
+        }
+        if (this.responsiveSlidersHandler) {
+            window.removeEventListener('resize', this.responsiveSlidersHandler);
+            this.responsiveSlidersHandler = null;
+        }
+        
         // Удаляем все созданные контейнеры
         const containers = [
             '.controls-container',

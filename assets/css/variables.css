@@ -4,8 +4,8 @@
     /* Основные цвета */
     --color-dark-blue: #021927;
     --color-antracit: #112e3d;
-    --color-green: #00ff00;
-    --color-dark-green: #009300;
+    --color-green: #4FC3F7;    /* Холодный светло-голубой */
+    --color-dark-green: #0288D1;  /* Холодный темно-голубой */
 
     /* Цвета игровых элементов */
     --color-peg: #a7a6a6;

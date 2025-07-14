@@ -23,12 +23,12 @@ class BinsManager {
         const distance = Math.abs(index - middle) / middle;
 
         if (distance < 0.3) {
-            return `rgb(255, 255, 0)`;
+            return `rgb(173, 216, 230)`;  // Светло-голубой для центральных корзин
         }
 
-        const red = Math.round(255);
-        const green = Math.round(255 * (1 - distance));
-        const blue = 0;
+        const red = Math.round(70 + 50 * (1 - distance));   // Приглушенный красный компонент
+        const green = Math.round(130 + 86 * (1 - distance)); // Голубовато-зеленый компонент
+        const blue = Math.round(180 + 75 * distance);        // Синий компонент усиливается к краям
 
         return `rgb(${red}, ${green}, ${blue})`;
     }

@@ -46,55 +46,143 @@
 
 /* Стили для контейнера отдельного слайдера */
 .slider-container {
-    margin-bottom: 8px;
-    width: 100% !important;
-}/* Стили для контейнера слайдеров */
-.sliders-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 180px;  /* Высота для вертикального слайдера */
+    width: 60px;   /* Ширина контейнера */
+    margin-bottom: 0;
+    justify-content: flex-end;  /* Выравнивание по низу */
+}/* Стили для красивого отображения выигрышей */
+#wins-container {
+    background: linear-gradient(135deg, var(--color-green) 0%, var(--color-dark-green) 100%);
+    border-radius: 20px;
+    padding: 15px 25px;
+    min-width: 200px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(79, 195, 247, 0.5);
+    border: 2px solid #ffffff;
+    margin: 20px auto;
+}
+
+#wins-container .wins-amount {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    display: block;
+}
+
+#wins-container .wins-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+/* Стили для контейнера слайдеров */
+.sliders-container {
+    display: flex;
+    flex-direction: row;  /* Горизонтальное расположение контейнеров слайдеров */
+    justify-content: center;
+    align-items: flex-end;  /* Выравнивание по низу */
     padding: 5px;
-    height: 150px;
-    margin-left: auto;
-    margin-right: auto;
+    height: 200px;  /* Увеличиваем высоту для вертикальных слайдеров */
+    margin: 20px auto;
+    gap: 30px;  /* Отступы между слайдерами */
+}
+
+/* Медиа-запросы для планшетов и десктопов */
+@media (min-width: 768px) {
+    .game-controls {
+        display: flex;
+        flex-direction: row;  /* Горизонтальное расположение на больших экранах */
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        margin: 20px auto;
+    }
+    
+    .game-controls .sliders-container {
+        margin: 0; /* Убираем отступы для компактности */
+    }
+    
+    /* Стили для слайдеров в game-header */
+    .game-header .sliders-container {
+        margin: 20px auto 10px auto;
+        height: 180px; /* Немного уменьшаем высоту для компактности */
+    }
+    
+    /* Стили для кнопки bet в game-header */
+    .game-header .bet-button {
+        margin: 10px auto 0 auto;
+        display: block;
+    }
+    
+    .game-header {
+        padding-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
 }
 
 /* Стили для меток слайдеров */
 .slider-label {
     display: block;
-    margin-bottom: 8px;
+    margin-top: 8px;    /* Отступ сверху для метки под слайдером */
+    margin-bottom: 2px;
     font-weight: bold;
     color: #ffffff;
     font-size: var(--font-size-sm);
+    text-align: center;
+    white-space: nowrap;  /* Предотвращаем перенос текста */
+}
+
+/* Стили для значений слайдеров */
+.slider-value {
+    display: block;
+    margin-bottom: 0;
+    font-weight: bold;
+    color: #87CEEB;  /* Голубой цвет как у шариков */
+    font-size: var(--font-size-md);
+    text-align: center;
+    white-space: nowrap;
 }
 
 /* Стили для самих слайдеров - трек */
 .slider {
-    width: 100% !important;
-    height: 30px;
-    margin: 0;
+    width: 15px;   /* Увеличенная ширина вертикального слайдера */
+    height: 120px; /* Высота вертикального слайдера */
+    margin: 10px 0;
     padding: 0;
     background-color: transparent;
     -webkit-appearance: none;
     appearance: none;
     outline: none;
     position: relative;
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* WebKit */
+    transform: rotate(180deg); /* Поворачиваем для правильного направления */
 }
 
 /* Стили для трека в Chrome и других браузерах */
 .slider::-webkit-slider-runnable-track {
-    height: 10px;
+    width: 15px;   /* Увеличенная ширина трека для вертикального слайдера */
+    height: 120px; /* Высота трека */
     background: #828385;
-    border-radius: 5px;
+    border-radius: 7px;  /* Увеличенное скругление */
     border: none;
-    margin-top: 10px; /* Для центрирования трека */
 }
 
 /* Стили для трека в Firefox */
 .slider::-moz-range-track {
-    height: 10px;
+    width: 15px;   /* Увеличенная ширина трека для вертикального слайдера */
+    height: 120px; /* Высота трека */
     background: #828385;
-    border-radius: 5px;
+    border-radius: 7px;  /* Увеличенное скругление */
     border: none;
 }
 
@@ -102,33 +190,47 @@
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 28px;
-    background: #ffffff;
-    border-radius: 6px;
+    width: 30px;   /* Увеличенная ширина бегунка */
+    height: 30px;  /* Увеличенная высота бегунка (круглый) */
+    background: var(--color-green);  /* Цвет как у кнопки */
+    border-radius: 50%;  /* Круглый бегунок */
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    margin-top: -9px; /* Для центрирования бегунка относительно трека */
+    margin-left: -7.5px; /* Центрирование относительно трека (30px бегунок - 15px трек) / 2 */
+    border: 2px solid #ffffff;  /* Белая граница */
 }
 
 /* Стили для бегунка в Firefox */
 .slider::-moz-range-thumb {
-    width: 20px;
-    height: 28px;
-    background: #ffffff;
-    border-radius: 6px;
+    width: 30px;   /* Увеличенная ширина бегунка */
+    height: 30px;  /* Увеличенная высота бегунка (круглый) */
+    background: var(--color-green);  /* Цвет как у кнопки */
+    border-radius: 50%;  /* Круглый бегунок */
     cursor: pointer;
-    border: none;
+    border: 2px solid #ffffff;  /* Белая граница */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Стили для активного состояния слайдера */
 .slider:active::-webkit-slider-thumb {
-    background: #f0f0f0;
+    background: var(--color-dark-green);  /* Темный цвет при нажатии */
+    transform: scale(1.1);  /* Увеличение при нажатии */
 }
 
 .slider:active::-moz-range-thumb {
-    background: #f0f0f0;
+    background: var(--color-dark-green);  /* Темный цвет при нажатии */
+    transform: scale(1.1);  /* Увеличение при нажатии */
+}
+
+/* Стили для состояния при наведении */
+.slider:hover::-webkit-slider-thumb {
+    background: var(--color-dark-green);  /* Темный цвет при наведении */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);  /* Усиленная тень */
+}
+
+.slider:hover::-moz-range-thumb {
+    background: var(--color-dark-green);  /* Темный цвет при наведении */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);  /* Усиленная тень */
 }
 
 /* Контейнер для отладочного ввода */
@@ -153,12 +255,13 @@
 /* Кнопка ставки */
 .bet-button {
     display: block;
-    width: 100%;
-    padding: 10px;
+    width: 80px;   /* Фиксированная ширина для круглой кнопки */
+    height: 80px;  /* Фиксированная высота для круглой кнопки */
+    padding: 0;
     background-color: var(--color-green);
     color: black;
     border: none;
-    border-radius: var(--border-radius-md);
+    border-radius: 50%;  /* Круглая форма */
     font-size: var(--font-size-lg);
     font-weight: bold;
     cursor: pointer;
@@ -166,6 +269,9 @@
     text-align: center;
     transition: var(--transition-default);
     box-shadow: var(--shadow-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .bet-button:hover {
@@ -179,13 +285,13 @@
 }
 
 .bet-button-disabled {
-    background-color: #555555;
-    color: #aaaaaa;
+    background-color: #37474F;  /* Холодный темно-серый */
+    color: #90A4AE;  /* Холодный светло-серый */
     cursor: not-allowed;
 }
 
 .bet-button-disabled:hover {
-    background-color: #555555;
+    background-color: #37474F;  /* Холодный темно-серый */
     box-shadow: var(--shadow-default);
     transform: none;
 }
