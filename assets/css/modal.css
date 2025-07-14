@@ -1,0 +1,114 @@
+.win-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999; /* Увеличиваем z-index */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Увеличиваем непрозрачность фона */
+    align-items: center;
+    justify-content: center;
+    overflow: auto; /* Добавляем прокрутку на всякий случай */
+}
+
+.win-modal-content {
+    background-color: #021927;
+    border: 4px solid #00ff00;
+    border-radius: 20px;
+    box-shadow: 0 0 15px #00ff00, 0 0 20px #00ff00;
+    width: 80%;
+    max-width: 400px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+    animation: glow 1.5s ease-in-out infinite alternate;
+    z-index: 10000; /* Увеличиваем z-index содержимого */
+}
+
+.win-modal-header {
+    font-size: 36px;
+    color: #00ff00;
+    font-weight: bold;
+    margin-bottom: 30px;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+#claim-bonus-btn {
+    background-color: transparent;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    border-radius: 15px;
+    font-size: 28px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    text-shadow: 0 0 5px #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+#claim-bonus-btn:hover {
+    background-color: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 15px #00ff00;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+    to {
+        box-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00;
+    }
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 767px) {
+    .win-modal-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .win-modal-header {
+        font-size: 28px;
+    }
+
+    #claim-bonus-btn {
+        font-size: 22px;
+        padding: 8px 16px;
+    }
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.win-modal.show {
+    display: flex;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.win-modal.hide {
+    animation: fadeOut 0.3s ease forwards;
+}

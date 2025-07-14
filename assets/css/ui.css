@@ -1,0 +1,210 @@
+/*ui.css*/
+
+/* Стили для контейнера с информацией о ставке и балансе */
+.money-bet-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+/* Стили для отображения баланса */
+.balance-display {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: var(--font-size-md);
+}
+
+/* Контейнер для отображения выигрышей */
+#wins-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    z-index: 1000;
+}
+
+/* Стили для отображения выигрыша */
+#wins-display {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: var(--font-size-md);
+}
+
+/* Стили для контейнера отдельного слайдера */
+.slider-container {
+    margin-bottom: 8px;
+    width: 100% !important;
+}/* Стили для контейнера слайдеров */
+.sliders-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+    height: 150px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Стили для меток слайдеров */
+.slider-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ffffff;
+    font-size: var(--font-size-sm);
+}
+
+/* Стили для самих слайдеров - трек */
+.slider {
+    width: 100% !important;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    position: relative;
+}
+
+/* Стили для трека в Chrome и других браузерах */
+.slider::-webkit-slider-runnable-track {
+    height: 10px;
+    background: #828385;
+    border-radius: 5px;
+    border: none;
+    margin-top: 10px; /* Для центрирования трека */
+}
+
+/* Стили для трека в Firefox */
+.slider::-moz-range-track {
+    height: 10px;
+    background: #828385;
+    border-radius: 5px;
+    border: none;
+}
+
+/* Стили для бегунка в Chrome/Safari/Opera */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 28px;
+    background: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-top: -9px; /* Для центрирования бегунка относительно трека */
+}
+
+/* Стили для бегунка в Firefox */
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 28px;
+    background: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для активного состояния слайдера */
+.slider:active::-webkit-slider-thumb {
+    background: #f0f0f0;
+}
+
+.slider:active::-moz-range-thumb {
+    background: #f0f0f0;
+}
+
+/* Контейнер для отладочного ввода */
+.debug-input-container {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Поле отладочного ввода */
+.debug-input {
+    padding: 8px;
+    width: 80%;
+    border: 1px solid #4caf50;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Кнопка ставки */
+.bet-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: var(--color-green);
+    color: black;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0 auto;
+    text-align: center;
+    transition: var(--transition-default);
+    box-shadow: var(--shadow-default);
+}
+
+.bet-button:hover {
+    background-color: var(--color-dark-green);
+    box-shadow: var(--shadow-hover);
+}
+
+.bet-button:active {
+    transform: scale(0.98);
+    transition: var(--transition-active);
+}
+
+.bet-button-disabled {
+    background-color: #555555;
+    color: #aaaaaa;
+    cursor: not-allowed;
+}
+
+.bet-button-disabled:hover {
+    background-color: #555555;
+    box-shadow: var(--shadow-default);
+    transform: none;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    .money-bet-container {
+        top: 10px;
+        right: 10px;
+    }
+
+    #wins-container {
+        top: 10px;
+        left: 10px;
+    }
+
+    .balance-display, #wins-display {
+        padding: 6px 10px;
+        font-size: var(--font-size-sm);
+        margin-bottom: 5px;
+    }
+}

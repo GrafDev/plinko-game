@@ -1,0 +1,27 @@
+/*pegs.css*/
+
+/* Стили для гвоздиков (pegs) */
+.peg {
+    fill: var(--color-peg);
+    stroke: #888888;
+    stroke-width: 1px;
+}
+
+/* Стили для ореола гвоздика */
+.peg-aura {
+    fill: rgba(255, 255, 255, 0.2);
+    stroke: none;
+}
+
+/* Стили для анимаций гвоздиков */
+.peg-flash {
+    fill: #FFFFFF;
+    transition: fill 0.1s ease;
+}
+
+/* Стиль для гвоздиков верхнего ряда */
+.peg-top-row {
+    fill: var(--color-peg);
+    stroke: #888888;
+    stroke-dasharray: 2, 2;
+}

@@ -1,0 +1,50 @@
+/* variables.css - переменные стилей для Plinko Game */
+
+:root {
+    /* Основные цвета */
+    --color-dark-blue: #021927;
+    --color-antracit: #112e3d;
+    --color-green: #00ff00;
+    --color-dark-green: #009300;
+
+    /* Цвета игровых элементов */
+    --color-peg: #a7a6a6;
+    --color-wall: #444444;
+    --color-floor: #444444;
+    --color-ball: #ff35ff;
+    --color-ball-outline: #5f025f;
+
+    /* Размеры и отступы */
+    --bet-button-width: 80%;
+    --bet-button-padding: 10px 50px;
+    --controls-width: 150px;
+
+    /* Радиусы границ */
+    --border-radius-sm: 4px;
+    --border-radius-md: 5px;
+
+    /* Тени */
+    --shadow-default: rgba(0, 0, 0, 0.4) 0px 2px 5px;
+    --shadow-hover: rgba(0, 0, 0, 0.6) 0px 3px 7px;
+
+    /* Анимации */
+    --transition-default: all 0.3s ease;
+    --transition-active: transform 0.1s ease;
+
+    /* Размеры шрифтов */
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+
+    /* Адаптивные размеры */
+    --mobile-controls-width: 180px;
+    --mobile-header-height: 150px;
+}
+
+/* Медиа-запросы для мобильных устройств */
+@media (max-width: 600px) {
+    :root {
+        --bet-button-width: var(--mobile-controls-width);
+        --controls-width: var(--mobile-controls-width);
+    }
+}

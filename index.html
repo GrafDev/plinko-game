@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plinko Game</title>
+    <link rel="stylesheet" href="./assets/css/main.css">
+
+</head>
+<body>
+<div class="main-container">
+    <div class="game-container">
+        <div class="game-header">
+            <img src="assets/images/logo1.png" alt="Stake Game Logo"/>
+            <img src="assets/images/logo.png" alt="Plinko Game Logo" class="logo-plinko-main"/>
+        </div>
+        <div class="plinko-field">
+            <img src="assets/images/logo.png" alt="Plinko Game Logo" class="logo-plinko-piramid"/>
+            <div id="plinko-game"></div>
+            <div id="wins-container"></div>
+            <div id="bins-container" class="bins-container"></div>
+        </div>
+
+        <div class="game-controls">
+            <div id="sliders-container" class="sliders-container"></div>
+            <button id="bet-button" class="bet-button">Bet</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с выигрышем -->
+<div id="win-modal" class="win-modal">
+    <div class="win-modal-content">
+        <div class="win-modal-header">
+            <span id="win-amount">1000$ + 150FS</span>
+        </div>
+        <div class="win-modal-body">
+            <button id="claim-bonus-btn">CLAIM BONUS</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="assets/js/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+/*path.css*/
+
+/* Стили для меток точек пути */
+.path-point-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background-color: #2196F3; /* Базовый цвет (синий) */
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    min-width: 12px;
+    z-index: 1000;
+    pointer-events: none; /* Чтобы элемент не перехватывал клики */
+}
+
+/* Цвета для разных типов точек */
+.path-point-label--start {
+    background-color: #FF5722; /* Оранжевый для стартовых точек */
+}
+
+.path-point-label--end {
+    background-color: #4CAF50; /* Зеленый для конечных точек */
+}
+
+.path-point-label--row4 {
+    background-color: #FFC107; /* Желтый для точек четвертого ряда */
+}

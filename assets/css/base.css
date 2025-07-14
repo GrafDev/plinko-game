@@ -1,0 +1,324 @@
+
+/* Общие стили */
+
+.main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100dvw;
+    height: 100dvh;
+    background-color: var(--color-dark-blue);
+    overflow: hidden;
+}
+/* Основные стили для игрового контейнера */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    height: 100dvh;
+    max-width: 1600px;
+    background-color: var(--color-dark-blue);
+    overflow: hidden;
+}
+
+/* Стили для шапки игры */
+.game-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 20px;
+    height: fit-content;
+    background-color: var(--color-dark-blue);
+    z-index: 10; /* Увеличиваем z-index, чтобы header был всегда сверху */
+}
+
+.game-header img {
+    height: auto;
+    max-width: 30%;
+    object-fit: contain;
+}
+.logo-plinko-piramid {
+    display: none;
+}
+
+/* Стили для основного игрового поля */
+.plinko-field {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 15px;
+
+}
+
+
+
+/* CSS для позиционирования канваса */
+#plinko-game {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    overflow: hidden;
+}
+
+#plinko-game canvas {
+    display: block;
+    margin: 0 auto; /* Центрируем горизонтально */
+}
+
+/* Стили для контейнера с корзинами */
+.bins-container {
+    width: 100%;
+    height: 30px;
+    position: relative;
+    z-index: 5; /* Корзины должны быть над канвасом */
+}
+
+/* Стили для нижней панели с элементами управления */
+.game-controls {
+    padding: 15px;
+    background-color: var(--color-dark-blue);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Увеличиваем z-index, чтобы footer был всегда снизу */
+}
+/* Добавляем медиа-запрос для больших экранов */
+@media (min-width: 1024px) {
+    .logo-plinko-main {
+        display: none;
+    }
+    .logo-plinko-piramid {
+        display: block;
+    }
+    .plinko-field {
+        height: 90dvh;
+        aspect-ratio: 0.9;
+    }
+}
+/* Добавляем медиа-запрос для landscape ориентации */
+@media (orientation: landscape) {
+    /* Меняем flex-direction на row для основного контейнера */
+    .game-container {
+        flex-direction: row-reverse;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Настраиваем размеры и стили header в landscape */
+    .game-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        width: 20%;
+        height: 100%;
+        padding: 50px 50px 10px 10px;
+    }
+
+    .game-header img {
+        max-width: 90%;
+        margin-bottom: 10px;
+    }
+
+    /* Настраиваем панель управления в landscape */
+    .game-controls {
+        display: flex;
+        justify-content: start;
+        width: 20%;
+        height: 100%;
+        flex-direction: column;
+        padding: 50px 10px 10px 50px;
+    }
+
+    /* Убеждаемся, что контейнер слайдеров отображается вертикально */
+    .sliders-container {
+        flex-direction: column;
+        width: 100% !important;
+        margin: 0 0 20px 0;
+    }
+
+    /* Обеспечиваем корректное отображение контейнера корзин */
+    .bins-container {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+    }
+
+    /* Корректируем контейнер для баланса */
+    .money-bet-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+}
+
+/* Добавляем стили для корректного отображения на маленьких экранах в landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+    .game-header {
+        width: 20%;
+        padding: 20px 20px 0 0;
+    }
+
+    .plinko-field {
+        width: 60%;
+        height: 100%;
+
+    }
+
+    .game-controls {
+        width: 20%;
+        padding: 10px 0 0 20px;
+    }
+
+    .bet-button {
+        width: 100%;
+    }
+    .game-header img {
+        max-width: 100%;
+    }
+
+
+}
+@media (max-width: 767px) and (orientation: portrait) {
+    .game-container {
+        flex-direction: column;
+        height: 100dvh;
+        justify-content: space-between;
+    }
+
+    .game-header {
+        padding: 80px 0 30px 0;
+        height: auto;
+    }
+
+    .game-header img {
+        max-width: 50%;
+    }
+
+    .plinko-field {
+        flex: 1;
+        padding: 10px;
+        width: 100%;
+    }
+
+    .bins-container {
+        height: 25px;
+    }
+
+    .bin-label-new {
+        font-size: 10px;
+    }
+
+    .game-controls {
+        flex-direction: column-reverse;
+        padding: 20px 10px 20px 10px;
+
+        width: 100%;
+    }
+
+    .bet-button {
+        padding: 8px;
+        font-size: 14px;
+        max-width: 250px;
+    }
+
+    .sliders-container {
+        height: auto;
+        padding: 2px;
+    }
+
+    .slider {
+        height: 25px;
+    }
+
+    .money-bet-container {
+        top: 10px;
+        right: 10px;
+    }
+
+    .balance-display {
+        padding: 5px 8px;
+        font-size: 14px;
+    }
+}
+/* Медиазапрос для планшетов в портретной ориентации */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+    .game-container {
+        flex-direction: column;
+        height: 100dvh;
+        justify-content: space-between;
+    }
+
+    .game-header {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: end;
+        padding: 20px 20px;
+        height: 20px;
+    }
+
+    .game-header img {
+        max-width: 40%;
+    }
+
+    .plinko-field {
+        flex: 1;
+        width: 100%;
+        aspect-ratio: 0.9;
+        max-height: 70vh;
+        margin: 0 auto;
+        padding: 0 40px 0 40px;
+    }
+
+    .bins-container {
+        height: 28px;
+    }
+
+    .bin-label-new {
+        font-size: 12px;
+    }
+
+    .game-controls {
+        padding: 15px;
+        width: 100%;
+    }
+
+    .bet-button {
+        padding: 10px;
+        font-size: 16px;
+        max-width: 300px;
+    }
+
+    .sliders-container {
+        height: auto;
+        width: 40%;
+        padding: 20px;
+        margin-bottom: 10px;
+    }
+
+    .slider {
+        height: 28px;
+    }
+
+    .money-bet-container {
+        top: 15px;
+        right: 15px;
+    }
+
+    .balance-display {
+        margin-top: 150px;
+        padding: 6px 10px;
+        font-size: 15px;
+    }
+
+}

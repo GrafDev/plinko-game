@@ -1,0 +1,94 @@
+/*bins.css*/
+
+/* Стили для меток лунок (bin labels) */
+.bin-label {
+    position: absolute; /* Оставляем, поскольку это для внутренних элементов */
+    transform: translate(-50%, -50%);
+    color: black;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Стили для номеров лунок (bin numbers) */
+.bin-number {
+    position: absolute; /* Оставляем, поскольку это для внутренних элементов */
+    transform: translate(-50%, -50%);
+    background-color: #333;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    min-width: 20px;
+    z-index: 1000;
+    pointer-events: none;
+}
+/* Обновляем стили для контейнера корзин */
+.bins-container {
+    width: 100%;
+    height: 30px; /* Высота берется из config.binHeight */
+    background-color: transparent;
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 100;
+    overflow: visible;
+    position: relative; /* Добавляем позиционирование для margin-top */
+}
+
+/* Индивидуальная корзина */
+.bin {
+    position: relative;
+    height: 100%;
+    flex: 1;
+    margin: 0 1px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 5px;
+    transition: all 0.3s ease;
+}
+
+/* Стиль для крайних корзин (первая и последняя) */
+.bin:first-child, .bin:last-child {
+    flex: 2.2; /* Двойная ширина для крайних корзин */
+}
+
+.bin-label-new {
+    color: black;
+    font-size: 13px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.bin-flash {
+    background-color: #FFFFFF !important;
+}
+
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 767px) {
+    .bin-number {
+        font-size: 10px;
+    }
+
+    .bin-label-new {
+        font-size: 9px;
+    }
+}
+@media (max-height: 500px) {
+    .bin-number {
+        font-size: 12px;
+    }
+
+    .bin-label-new {
+        font-size: 11px;
+    }
+}
+
