@@ -586,29 +586,38 @@ class UIManager {
             
             if (config.showDebugInput) {
                 const debugInput = document.getElementById('debug-target-bins');
+                
+                // Если пользователь не ввел значение, берем из placeholder
+                if (debugInput && !debugInput.value.trim() && debugInput.placeholder) {
+                    const placeholderMatch = debugInput.placeholder.match(/now (\d+)/);
+                    if (placeholderMatch) {
+                        debugInput.value = placeholderMatch[1];
+                    }
+                }
+                
                 if (debugInput && debugInput.value.trim()) {
                     const targetWinsInput = parseInt(debugInput.value.trim(), 10);
                     
                     if (!isNaN(targetWinsInput) && targetWinsInput > 0) {
-                        // Сохраняем target значение
-                        self.lastTargetValue = targetWinsInput;
-                        console.log(`🎯 Попытка рассчитать распределение для целевой суммы: ${targetWinsInput}`);
-                        
-                        // Получаем реальные доступные значения из BinsManager
-                        const binCount = config.binCount || 17;
-                        const realAvailableValues = self.game.binsManager.getDistributedValues(binCount);
-                        const availableValues = [...realAvailableValues].sort((a, b) => b - a); // Сортируем по убыванию
-                        
-                        console.log(`📊 Количество лунок: ${binCount}`);
-                        console.log(`📊 Реальные значения лунок:`, realAvailableValues);
-                        console.log(`📊 Доступные значения (отсортированные):`, availableValues);
-                        
-                        // Алгоритм поиска комбинации лунок для целевой суммы
-                        console.log(`🔢 Поиск ${self.ballCount} лунок для суммы ${targetWinsInput}...`);
-                        
-                        let bestBinIndices = [];
-                        let bestSum = 0;
-                        let bestDifference = Infinity;
+                    // Сохраняем target значение
+                    self.lastTargetValue = targetWinsInput;
+                    console.log(`🎯 Попытка рассчитать распределение для целевой суммы: ${targetWinsInput}`);
+                    
+                    // Получаем реальные доступные значения из BinsManager
+                    const binCount = config.binCount || 17;
+                    const realAvailableValues = self.game.binsManager.getDistributedValues(binCount);
+                    const availableValues = [...realAvailableValues].sort((a, b) => b - a); // Сортируем по убыванию
+                    
+                    console.log(`📊 Количество лунок: ${binCount}`);
+                    console.log(`📊 Реальные значения лунок:`, realAvailableValues);
+                    console.log(`📊 Доступные значения (отсортированные):`, availableValues);
+                    
+                    // Алгоритм поиска комбинации лунок для целевой суммы
+                    console.log(`🔢 Поиск ${self.ballCount} лунок для суммы ${targetWinsInput}...`);
+                    
+                    let bestBinIndices = [];
+                    let bestSum = 0;
+                    let bestDifference = Infinity;
                         
                         // Простой жадный алгоритм с разложением по порядкам
                         let remaining = targetWinsInput;
