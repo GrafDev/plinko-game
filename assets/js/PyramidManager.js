@@ -106,11 +106,24 @@ class PyramidManager {
         // Определяем доступное пространство для пирамиды
         const gameWidth = this.game.width;
         const gameHeight = this.game.height;
+        
+        console.log(`🎮 Размеры игры в PyramidManager: ${gameWidth}x${gameHeight}`);
 
         // Определяем размеры пирамиды
         const pyramidBaseWidth = gameWidth - config.pegRadius*2.2;
         const lastRowPegCount = config.topPegs + config.rows - 1;
         const baseHorizontalSpacing = pyramidBaseWidth / (lastRowPegCount - 1);
+        
+        // Вычисляем реальную ширину пирамиды
+        const actualPyramidWidth = baseHorizontalSpacing * (lastRowPegCount - 1);
+        
+        console.log(`📊 pyramidBaseWidth=${pyramidBaseWidth}, lastRowPegCount=${lastRowPegCount}, baseHorizontalSpacing=${baseHorizontalSpacing}`);
+        console.log(`📏 Ширина канваса: ${gameWidth}px`);
+        console.log(`📏 Расчетная ширина пирамиды: ${actualPyramidWidth}px`);
+        console.log(`📏 Ширина контейнера: ${this.game.container.offsetWidth}px`);
+        
+        // Добавляем отладочные прямоугольники
+        // this.addDebugRectangles(gameWidth, gameHeight, actualPyramidWidth);
 
         // Отступ сверху для стартовых точек
         const topOffset = config.ballRadius * 4;
@@ -357,6 +370,68 @@ class PyramidManager {
     }
 
     /**
+     * Добавляет отладочные прямоугольники для визуализации границ
+     */
+    addDebugRectangles(gameWidth, gameHeight, pyramidWidth) {
+        // Удаляем старые отладочные элементы
+        this.removeDebugRectangles();
+        
+        // Прямоугольник границ канваса (красный)
+        const canvasBorder = Bodies.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, {
+            isStatic: true,
+            isSensor: true,
+            render: {
+                fillStyle: 'transparent',
+                strokeStyle: '#ff0000',
+                lineWidth: 3
+            },
+            label: 'debug_canvas_border'
+        });
+        
+        // Линия центра канваса (зеленая)
+        const centerLine = Bodies.rectangle(gameWidth/2, gameHeight/2, 2, gameHeight, {
+            isStatic: true,
+            isSensor: true,
+            render: {
+                fillStyle: '#00ff00',
+                strokeStyle: '#00ff00',
+                lineWidth: 2
+            },
+            label: 'debug_center_line'
+        });
+        
+        // Прямоугольник пирамиды (синий)
+        const pyramidCenter = config.pegRadius + pyramidWidth/2;
+        const pyramidBorder = Bodies.rectangle(pyramidCenter, gameHeight/2, pyramidWidth, gameHeight, {
+            isStatic: true,
+            isSensor: true,
+            render: {
+                fillStyle: 'transparent',
+                strokeStyle: '#0000ff',
+                lineWidth: 3
+            },
+            label: 'debug_pyramid_border'
+        });
+        
+        World.add(this.world, [canvasBorder, centerLine, pyramidBorder]);
+        
+        // Сохраняем ссылки для удаления
+        this.debugElements = [canvasBorder, centerLine, pyramidBorder];
+    }
+    
+    /**
+     * Удаляет отладочные прямоугольники
+     */
+    removeDebugRectangles() {
+        if (this.debugElements) {
+            for (const element of this.debugElements) {
+                World.remove(this.world, element);
+            }
+            this.debugElements = [];
+        }
+    }
+
+    /**
      * Очищает ресурсы класса при уничтожении
      */
     cleanup() {
@@ -367,6 +442,9 @@ class PyramidManager {
             }
         }
         this.auras = {};
+
+        // Удаляем отладочные элементы
+        this.removeDebugRectangles();
 
         // Очищаем гвоздики
         this.clearPegs();

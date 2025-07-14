@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест 1024px</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            border: 2px solid red;
+            height: 90vh;
+            width: 100%;
+            max-width: 1024px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .plinko-field {
+            border: 2px solid blue;
+            height: 90vh;
+            aspect-ratio: 0.9;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .pyramid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: green;
+            opacity: 0.5;
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="info">
+            <div>Ширина экрана: <span id="screen-width"></span>px</div>
+            <div>Ширина контейнера: <span id="container-width"></span>px</div>
+            <div>Ширина plinko-field: <span id="field-width"></span>px</div>
+            <div>Aspect ratio: <span id="aspect-ratio"></span></div>
+        </div>
+        
+        <div class="plinko-field">
+            <div class="pyramid"></div>
+        </div>
+    </div>
+    
+    <script>
+        function updateInfo() {
+            const container = document.querySelector('.container');
+            const field = document.querySelector('.plinko-field');
+            const containerRect = container.getBoundingClientRect();
+            const fieldRect = field.getBoundingClientRect();
+            
+            document.getElementById('screen-width').textContent = window.innerWidth;
+            document.getElementById('container-width').textContent = containerRect.width.toFixed(0);
+            document.getElementById('field-width').textContent = fieldRect.width.toFixed(0);
+            document.getElementById('aspect-ratio').textContent = (fieldRect.width / fieldRect.height).toFixed(2);
+        }
+        
+        updateInfo();
+        window.addEventListener('resize', updateInfo);
+    </script>
+</body>
+</html>

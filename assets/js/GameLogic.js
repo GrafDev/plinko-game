@@ -117,7 +117,7 @@ class GameLogic {
                     noMoreThrows
                 });
 
-                if (wins >= target && noMoreThrows) {
+                if (noMoreThrows) {
                     setTimeout(() => {
                         console.log("✅ Старт модального окна (проверка в checkBallsInBins)");
                         this.uiManager.showWinModal(wins);
@@ -136,15 +136,14 @@ class GameLogic {
         const multiplier = this.binsManager.getMultiplier(binIndex);
 
         if (this.uiManager) {
-            // Новая логика: выигрыш = стоимость шарика * множитель
-            const ballCost = this.ballCost;
-            const win = ballCost * multiplier;
+            // Новая логика: выигрыш = просто значение из лунки
+            const win = multiplier;
 
             // Добавляем выигрыш к сумме выигрышей, а не к балансу напрямую
             this.uiManager.addWin(win);
 
-            console.log(`Шарик ${ballId} попал в лунку ${binIndex} с множителем ${multiplier}.`);
-            console.log(`Стоимость шарика: ${ballCost}, Выигрыш: ${win}`);
+            console.log(`Шарик ${ballId} попал в лунку ${binIndex} со значением ${multiplier}.`);
+            console.log(`Выигрыш: $${win}`);
         }
 
         this.lastResult = {

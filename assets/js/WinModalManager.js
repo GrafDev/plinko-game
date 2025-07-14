@@ -45,7 +45,7 @@ class WinModalManager {
 
         const winAmountElement = document.getElementById('win-amount');
         if (winAmountElement) {
-            winAmountElement.textContent = `1000€`;
+            winAmountElement.textContent = `$${formattedWins}`;
         }
 
         // Добавляем класс для анимации появления

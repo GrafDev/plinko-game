@@ -41,13 +41,11 @@ class TargetWinsCalculator {
         // Получаем параметры из конфигурации
         const maxBalls = config.maxBalls || 5;
         const targetWins = config.targetWins || 1000;
-        const ballCost = config.ballCost || 10;
 
         console.log(`Расчет распределения шариков:`);
         console.log(`- Количество шариков: ${maxBalls}`);
         console.log(`- Целевой выигрыш: ${targetWins}`);
-        console.log(`- Стоимость шарика: ${ballCost}`);
-        console.log(`- Доступные множители:`, this.availableMultipliers);
+        console.log(`- Доступные значения:`, this.availableMultipliers);
         console.log(`- Количество лунок: ${config.binCount}`);
 
         // Проверяем, достаточно ли у нас шариков и множителей
@@ -57,18 +55,18 @@ class TargetWinsCalculator {
         }
 
         // Проверяем достижимость цели с имеющимися множителями
-        const maxPossibleWin = Math.max(...this.availableMultipliers) * ballCost * maxBalls;
+        const maxPossibleWin = Math.max(...this.availableMultipliers) * maxBalls;
         if (targetWins > maxPossibleWin) {
             console.warn(`Невозможно достичь выигрыша ${targetWins} с текущими множителями. Максимально возможный выигрыш: ${maxPossibleWin}`);
         }
 
         // Вызываем метод поиска оптимального распределения
-        const bestDistribution = this.findBestDistribution(maxBalls, targetWins, ballCost);
+        const bestDistribution = this.findBestDistribution(maxBalls, targetWins);
 
         // Если нашли распределение, проверяем его
         if (bestDistribution && bestDistribution.length > 0) {
             const expectedWin = bestDistribution.reduce((sum, binIndex) => {
-                return sum + this.availableMultipliers[binIndex] * ballCost;
+                return sum + this.availableMultipliers[binIndex];
             }, 0);
 
             console.log(`Итоговое распределение (индексы лунок):`, bestDistribution);
@@ -92,16 +90,15 @@ class TargetWinsCalculator {
      * с условием минимизации повторов одинаковых лунок
      * @param {number} maxBalls - Максимальное количество шариков
      * @param {number} targetWins - Целевая сумма выигрыша
-     * @param {number} ballCost - Стоимость одного шарика
      * @returns {Array} - Массив индексов лунок для каждого шарика
      */
-    findBestDistribution(maxBalls, targetWins, ballCost) {
+    findBestDistribution(maxBalls, targetWins) {
         // Создаем массив возможных комбинаций множителей
         const multipliers = [...this.availableMultipliers];
         const multiplierIndices = multipliers.map((_, index) => index);
 
-        // Преобразуем целевую сумму в целевое значение множителей
-        const targetMultiplierSum = targetWins / ballCost;
+        // Целевая сумма теперь просто targetWins (без деления на стоимость шарика)
+        const targetMultiplierSum = targetWins;
 
         console.log(`Ищем распределение для целевой суммы множителей: ${targetMultiplierSum}`);
         console.log(`Доступные множители:`, multipliers);
@@ -122,7 +119,7 @@ class TargetWinsCalculator {
         };
 
         // Функция для генерации комбинаций с определенным начальным множителем
-        const generateCombinations = (currentIndex, currentSum, combination, usedBins) => {
+        const generateCombinations = (currentSum, combination, usedBins) => {
             // Если достигли нужного количества шариков, проверяем насколько близко к цели
             if (combination.length === maxBalls) {
                 const diff = Math.abs(currentSum - targetMultiplierSum);
@@ -186,7 +183,7 @@ class TargetWinsCalculator {
                 combination.push(multiplierIndex);
 
                 // Рекурсивно продолжаем поиск
-                const found = generateCombinations(i, currentSum + multiplier, combination, newUsedBins);
+                const found = generateCombinations(currentSum + multiplier, combination, newUsedBins);
 
                 // Если нашли точное совпадение, возвращаем его
                 if (found) return true;
@@ -200,7 +197,7 @@ class TargetWinsCalculator {
 
         // Для небольшого числа шариков можно попробовать полный перебор
         if (maxBalls <= 3) {
-            generateCombinations(0, 0, [], new Map());
+            generateCombinations(0, [], new Map());
         } else {
             // Для большего числа шариков используем модифицированный алгоритм
             // Предпочитаем более разнообразные лунки
@@ -299,7 +296,7 @@ class TargetWinsCalculator {
 
         // Проверяем найденное распределение
         const finalSum = bestDistribution.reduce((sum, idx) => sum + multipliers[idx], 0);
-        const expectedWin = finalSum * ballCost;
+        const expectedWin = finalSum;
         const uniqueCount = countUniqueBins(bestDistribution);
 
         console.log(`Найдено распределение: ${bestDistribution.map(idx => idx + 1).join(', ')}`);

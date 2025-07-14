@@ -103,6 +103,13 @@ class PlinkoGame {
         const rect = this.container.getBoundingClientRect();
         const availableWidth = rect.width;
         const availableHeight = rect.height;
+        
+        // Отладка размеров родительских элементов
+        const plinkoField = this.container.parentElement;
+        const plinkoFieldRect = plinkoField.getBoundingClientRect();
+        console.log(`🔍 Размеры .plinko-field: ${plinkoFieldRect.width}x${plinkoFieldRect.height}`);
+        console.log(`🔍 Размеры #plinko-game: ${availableWidth}x${availableHeight}`);
+        console.log(`🔍 Размеры экрана: ${window.innerWidth}x${window.innerHeight}`);
 
         if (availableWidth < 300 || availableHeight < 300) {
             console.warn("⚠️ Размеры слишком малы, пропуск обновления");
@@ -168,11 +175,15 @@ class PlinkoGame {
                 height: this.height,
                 wireframes: false,
                 background: '#021927',
-                pixelRatio: window.devicePixelRatio
+                pixelRatio: 1
             }
         });
 
         const canvas = this.render.canvas;
+        console.log(`🎨 Размеры канваса: ${canvas.width}x${canvas.height}`);
+        console.log(`🎨 Размеры this: ${this.width}x${this.height}`);
+        console.log(`🎨 Размеры контейнера: ${this.container.offsetWidth}x${this.container.offsetHeight}`);
+        
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.display = 'block';

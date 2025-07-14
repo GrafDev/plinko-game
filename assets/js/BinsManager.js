@@ -44,35 +44,65 @@ class BinsManager {
             return result;
         }
 
+        // Фиксированное распределение от центра
+        // Учитываем что крайние лунки сдваиваются: 0,1 сдвоены и последние две тоже
+        // Реальное количество уникальных значений = logicalBinCount - 2
+        const uniqueValuesCount = logicalBinCount - 2;
         const distributedValues = new Array(logicalBinCount);
-
-        const isEven = logicalBinCount % 2 === 0;
-        const middle = Math.floor(logicalBinCount / 2);
-
-        for (let i = 0; i < logicalBinCount; i++) {
-            let valueIndex;
-
-            if (isEven) {
-                if (i < middle) {
-                    valueIndex = middle - i - 1;
-                } else {
-                    valueIndex = i - middle;
-                }
+        const isEven = uniqueValuesCount % 2 === 0;
+        const middle = Math.floor(uniqueValuesCount / 2);
+        
+        // Размещаем значения симметрично от центра
+        // Центральные позиции начинаются с индекса 1 (так как 0 и 1 сдвоены)
+        const centerStart = 1;
+        const centerEnd = logicalBinCount - 2; // Последние две тоже сдвоены
+        const realMiddle = Math.floor((centerStart + centerEnd) / 2);
+        
+        // Центральная лунка получает 0
+        distributedValues[realMiddle] = costedBins[0];
+        if (uniqueValuesCount % 2 === 0) {
+            distributedValues[realMiddle + 1] = costedBins[0];
+        }
+        
+        // Заполняем симметрично от центра
+        let valueIndex = 1;
+        for (let distance = 1; distance < costedBins.length && valueIndex < costedBins.length; distance++) {
+            const value = costedBins[valueIndex];
+            
+            let leftPos, rightPos;
+            
+            if (uniqueValuesCount % 2 === 0) {
+                // Четное количество - две центральные лунки
+                leftPos = realMiddle - distance;
+                rightPos = realMiddle + 1 + distance;
             } else {
-                if (i === middle) {
-                    valueIndex = 0;
-                } else if (i < middle) {
-                    valueIndex = middle - i;
-                } else {
-                    valueIndex = i - middle;
-                }
+                // Нечетное количество - одна центральная лунка
+                leftPos = realMiddle - distance;
+                rightPos = realMiddle + distance;
             }
-
-            if (valueIndex >= costedBins.length) {
-                valueIndex = costedBins.length - 1;
+            
+            // Размещаем значения если они помещаются
+            if (leftPos >= centerStart && rightPos <= centerEnd) {
+                distributedValues[leftPos] = value;
+                distributedValues[rightPos] = value;
+                valueIndex++;
+            } else {
+                break;
             }
-
-            distributedValues[i] = costedBins[valueIndex];
+        }
+        
+        // Сдвоенные крайние лунки получают фиксированное значение 100
+        const extremeValue = 100; // Фиксированное значение для крайних лунок
+        distributedValues[0] = extremeValue;  // Левая крайняя (сдвоена с 1)
+        distributedValues[1] = extremeValue;  // Левая крайняя (сдвоена с 0)
+        distributedValues[logicalBinCount - 2] = extremeValue; // Правая крайняя (сдвоена с последней)
+        distributedValues[logicalBinCount - 1] = extremeValue; // Правая крайняя (сдвоена с предпоследней)
+        
+        // Если лунок больше чем значений, повторяем последнее значение
+        for (let i = 0; i < logicalBinCount; i++) {
+            if (distributedValues[i] === undefined) {
+                distributedValues[i] = costedBins[costedBins.length - 1];
+            }
         }
 
         return distributedValues;
@@ -162,7 +192,7 @@ class BinsManager {
         leftBinElement.className = 'bin';
         leftBinElement.dataset.binIndex = '0';
         leftBinElement.style.backgroundColor = binColor1;
-        leftBinElement.innerHTML = `<span class="bin-label-new">${multiplier1}X</span>`;
+        leftBinElement.innerHTML = `<span class="bin-label-new">$${multiplier1}</span>`;
         binsContainer.appendChild(leftBinElement);
         this.htmlBins.push(leftBinElement);
 
@@ -216,7 +246,7 @@ class BinsManager {
             binElement.className = 'bin';
             binElement.dataset.binIndex = adjustedIndex.toString();
             binElement.style.backgroundColor = binColor;
-            binElement.innerHTML = `<span class="bin-label-new">${multiplier}X</span>`;
+            binElement.innerHTML = `<span class="bin-label-new">$${multiplier}</span>`;
             binsContainer.appendChild(binElement);
             this.htmlBins.push(binElement);
         }
@@ -273,7 +303,7 @@ class BinsManager {
         rightBinElement.className = 'bin';
         rightBinElement.dataset.binIndex = (logicalBinCount - 1).toString();
         rightBinElement.style.backgroundColor = binColor2;
-        rightBinElement.innerHTML = `<span class="bin-label-new">${multiplier2}X</span>`;
+        rightBinElement.innerHTML = `<span class="bin-label-new">$${multiplier2}</span>`;
         binsContainer.appendChild(rightBinElement);
         this.htmlBins.push(rightBinElement);
 

@@ -243,9 +243,30 @@
 /* Контейнер для отладочного ввода */
 .debug-input-container {
     width: 100%;
+    margin-top: 15px;
     margin-bottom: 10px;
     display: flex;
     justify-content: center;
+}
+
+/* Для узких экранов - вертикальное расположение */
+@media (max-width: 767px) {
+    .game-controls {
+        flex-direction: column !important;
+    }
+    
+    .debug-input-container {
+        order: 1; /* Первый элемент перед sliders-container */
+        margin-bottom: 15px;
+    }
+    
+    .sliders-container {
+        order: 2; /* Второй элемент после debug-input-container */
+    }
+    
+    .bet-button {
+        order: 3; /* Кнопка bet последней */
+    }
 }
 
 /* Поле отладочного ввода */

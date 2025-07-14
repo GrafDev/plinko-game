@@ -7,8 +7,8 @@ class UIManager {
     constructor(gameInstance) {
         this.game = gameInstance;
 
-        this.ballCount = config.defaultBallCount || 1;
-        this.maxBallCount = config.maxBallCount || 10;
+        this.ballCount = config.maxBalls || 5;
+        this.maxBallCount = config.maxBalls || 10;
 
         // Устанавливаем начальный баланс, гарантируя, что он не отрицательный
         this.balance = Math.max(0, config.initialBalance || 50);
@@ -161,7 +161,8 @@ class UIManager {
         // Очищаем существующий контейнер
         slidersContainer.innerHTML = '';
 
-        const initialRows = config.rows;
+        const initialRows = baseConfig.rows - 4; // Минимальное количество рядов
+        config.rows = initialRows; // Устанавливаем в конфигурацию
 
         const rowsContainer = document.createElement('div');
         rowsContainer.className = 'slider-container';
@@ -181,7 +182,7 @@ class UIManager {
         rowsSlider.className = 'slider';
         rowsSlider.min = (baseConfig.rows-4).toString();
         rowsSlider.max = baseConfig.rows.toString();
-        rowsSlider.value = initialRows.toString();
+        rowsSlider.value = (baseConfig.rows-4).toString(); // Устанавливаем минимальное значение
         rowsContainer.appendChild(rowsSlider);
 
         // Сохраняем ссылку на слайдер rows
@@ -258,6 +259,9 @@ class UIManager {
 
             // Обновляем отображение оставшихся шаров с учетом выбранного количества
             self.updateRemainingBalls();
+            
+            // Обновляем placeholder в debug input
+            self.updateDebugInputPlaceholder();
         });
 
         // Добавляем обработчик для динамического обновления значения rows
@@ -320,6 +324,9 @@ class UIManager {
 
                     // ВАЖНО: инициализируем массив целевых лунок ПОСЛЕ пересоздания мира
                     this.initializeTargetBins();
+                    
+                    // Обновляем placeholder в debug input
+                    this.updateDebugInputPlaceholder();
 
                     console.log(`Количество рядов изменено с ${oldRows} на ${newRows}`);
                 } catch (error) {
@@ -351,13 +358,36 @@ class UIManager {
         debugInput.type = 'text';
         debugInput.id = 'debug-target-bins';
         debugInput.className = 'debug-input';
-        debugInput.placeholder = 'Номера лунок через запятую (1,2,3...)';
+        
+        // Рассчитываем максимально возможную сумму
+        const maxPossibleSum = this.calculateMaxPossibleSum();
+        debugInput.placeholder = `Целевая сумма выигрыша (макс: ${maxPossibleSum})`;
 
         debugContainer.appendChild(debugInput);
 
-        const betButton = document.getElementById('bet-button');
-        if (betButton && betButton.parentNode) {
-            betButton.parentNode.insertBefore(debugContainer, betButton);
+        const binsContainer = document.getElementById('bins-container');
+        if (binsContainer && binsContainer.parentNode) {
+            binsContainer.parentNode.insertBefore(debugContainer, binsContainer.nextSibling);
+        }
+    }
+
+    // Функция для расчета максимально возможной суммы выигрыша
+    calculateMaxPossibleSum() {
+        // Получаем максимальное значение из config.costedBins
+        const maxBinValue = Math.max(...config.costedBins);
+        
+        // Умножаем на количество шариков
+        const maxPossibleSum = maxBinValue * this.ballCount;
+        
+        return maxPossibleSum;
+    }
+
+    // Функция для обновления placeholder в debug input
+    updateDebugInputPlaceholder() {
+        const debugInput = document.getElementById('debug-target-bins');
+        if (debugInput) {
+            const maxPossibleSum = this.calculateMaxPossibleSum();
+            debugInput.placeholder = `Целевая сумма выигрыша (макс: ${maxPossibleSum})`;
         }
     }
 
@@ -446,15 +476,170 @@ class UIManager {
             if (config.showDebugInput) {
                 const debugInput = document.getElementById('debug-target-bins');
                 if (debugInput && debugInput.value.trim()) {
-                    const inputValues = debugInput.value.split(',').map(num => {
-                        return parseInt(num.trim(), 10) - 1;
-                    }).filter(num => {
-                        return !isNaN(num) && num >= 0 && num < config.binCount;
-                    });
-
-                    if (inputValues.length > 0) {
-                        targetBins = inputValues;
-                        console.log('Использую целевые лунки из отладочного инпута:', targetBins.map(i => i + 1).join(', '));
+                    const targetWinsInput = parseInt(debugInput.value.trim(), 10);
+                    
+                    if (!isNaN(targetWinsInput) && targetWinsInput > 0) {
+                        console.log(`🎯 Попытка рассчитать распределение для целевой суммы: ${targetWinsInput}`);
+                        
+                        // Получаем реальные доступные значения из BinsManager
+                        const binCount = config.binCount || 17;
+                        const realAvailableValues = self.game.binsManager.getDistributedValues(binCount);
+                        const availableValues = [...realAvailableValues].sort((a, b) => b - a); // Сортируем по убыванию
+                        
+                        console.log(`📊 Количество лунок: ${binCount}`);
+                        console.log(`📊 Реальные значения лунок:`, realAvailableValues);
+                        console.log(`📊 Доступные значения (отсортированные):`, availableValues);
+                        
+                        // Алгоритм поиска комбинации лунок для целевой суммы
+                        console.log(`🔢 Поиск ${self.ballCount} лунок для суммы ${targetWinsInput}...`);
+                        
+                        let bestBinIndices = [];
+                        let bestSum = 0;
+                        let bestDifference = Infinity;
+                        
+                        // Простой жадный алгоритм с разложением по порядкам
+                        let remaining = targetWinsInput;
+                        let tempBinIndices = [];
+                        
+                        // Сортируем реальные значения по убыванию с их индексами
+                        // Убираем дубликаты значений, оставляя только уникальные
+                        const uniqueValues = [...new Set(realAvailableValues)];
+                        const valueWithIndex = uniqueValues.map(value => {
+                            return {value};
+                        }).sort((a, b) => b.value - a.value);
+                        
+                        console.log(`🔍 Уникальные значения для ${binCount} лунок:`, valueWithIndex.map(item => `$${item.value}`));
+                        
+                        // Улучшенный алгоритм - пытаемся найти точную комбинацию
+                        function findBestCombination(targetSum, maxBalls) {
+                            let bestCombination = [];
+                            let bestSum = 0;
+                            let bestDifference = Infinity;
+                            
+                            // Пробуем различные комбинации
+                            function tryCombo(currentCombo, currentSum, remainingBalls) {
+                                if (remainingBalls === 0 || currentSum >= targetSum) {
+                                    const diff = Math.abs(currentSum - targetSum);
+                                    if (diff < bestDifference) {
+                                        bestDifference = diff;
+                                        bestSum = currentSum;
+                                        bestCombination = [...currentCombo];
+                                    }
+                                    return;
+                                }
+                                
+                                // Пробуем каждое уникальное значение
+                                for (const {value} of valueWithIndex) {
+                                    if (value === 0) continue;
+                                    if (currentSum + value <= targetSum + (targetSum * 0.2)) { // Допускаем превышение на 20%
+                                        // Находим все лунки с таким значением
+                                        const binIndicesWithValue = realAvailableValues
+                                            .map((val, idx) => val === value ? idx : -1)
+                                            .filter(idx => idx !== -1);
+                                        
+                                        // Пробуем первую доступную лунку с этим значением
+                                        const binIndex = binIndicesWithValue[0];
+                                        currentCombo.push(binIndex);
+                                        tryCombo(currentCombo, currentSum + value, remainingBalls - 1);
+                                        currentCombo.pop();
+                                    }
+                                }
+                                
+                                // Если ничего не подошло, добавляем ноль
+                                const zeroIndex = realAvailableValues.indexOf(0);
+                                if (zeroIndex !== -1) {
+                                    currentCombo.push(zeroIndex);
+                                    tryCombo(currentCombo, currentSum, remainingBalls - 1);
+                                    currentCombo.pop();
+                                }
+                            }
+                            
+                            tryCombo([], 0, maxBalls);
+                            
+                            return {
+                                combination: bestCombination,
+                                sum: bestSum,
+                                difference: bestDifference
+                            };
+                        }
+                        
+                        // Если шариков мало, используем точный поиск
+                        if (self.ballCount <= 5) {
+                            const result = findBestCombination(targetWinsInput, self.ballCount);
+                            tempBinIndices = result.combination;
+                            console.log(`🎯 Точный поиск: получено ${result.sum} (разница: ${result.difference})`);
+                        } else {
+                            // Для большого количества шариков используем жадный алгоритм
+                            for (const {value} of valueWithIndex) {
+                                if (value === 0) continue;
+                                
+                                const count = Math.floor(remaining / value);
+                                if (count > 0) {
+                                    const binIndicesWithValue = realAvailableValues
+                                        .map((val, idx) => val === value ? idx : -1)
+                                        .filter(idx => idx !== -1);
+                                    
+                                    const maxCount = Math.min(count, self.ballCount - tempBinIndices.length);
+                                    
+                                    for (let i = 0; i < maxCount; i++) {
+                                        const binIndex = binIndicesWithValue[i % binIndicesWithValue.length];
+                                        tempBinIndices.push(binIndex);
+                                        remaining -= value;
+                                    }
+                                    
+                                    if (tempBinIndices.length >= self.ballCount) break;
+                                }
+                            }
+                        }
+                        
+                        // Заполняем оставшиеся позиции нулями
+                        while (tempBinIndices.length < self.ballCount) {
+                            const zeroIndex = realAvailableValues.indexOf(0);
+                            if (zeroIndex !== -1) {
+                                tempBinIndices.push(zeroIndex);
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        // Обрезаем до нужного количества шариков
+                        tempBinIndices = tempBinIndices.slice(0, self.ballCount);
+                        
+                        bestBinIndices = tempBinIndices;
+                        bestSum = bestBinIndices.reduce((sum, binIndex) => sum + realAvailableValues[binIndex], 0);
+                        bestDifference = Math.abs(bestSum - targetWinsInput);
+                        
+                        console.log(`🎯 Найдена комбинация лунок:`);
+                        console.log(`📊 Номера лунок:`, bestBinIndices.map(i => i + 1));
+                        console.log(`📊 Значения лунок:`, bestBinIndices.map(i => realAvailableValues[i]));
+                        console.log(`💰 Получено: ${bestSum} из ${targetWinsInput} (разница: ${bestDifference})`);
+                        
+                        // Теперь bestBinIndices содержит реальные номера лунок
+                        
+                        // Дополнительная проверка: посчитаем ожидаемую сумму через BinsManager
+                        if (bestBinIndices && bestBinIndices.length > 0) {
+                            // Проверяем валидность индексов лунок
+                            const validBinIndices = bestBinIndices.filter(binIndex => 
+                                binIndex >= 0 && binIndex < binCount
+                            );
+                            
+                            if (validBinIndices.length !== bestBinIndices.length) {
+                                console.warn(`⚠️ Некоторые индексы лунок недействительны, используем только валидные`);
+                            }
+                            
+                            const expectedSum = validBinIndices.reduce((sum, binIndex) => {
+                                const multiplier = self.game.binsManager.getMultiplier(binIndex);
+                                console.log(`Лунка ${binIndex + 1}: множитель ${multiplier}`);
+                                return sum + multiplier;
+                            }, 0);
+                            
+                            console.log(`🎯 Проверка через BinsManager: ${expectedSum} (целевая: ${targetWinsInput})`);
+                            
+                            targetBins = validBinIndices;
+                            console.log(`✅ Использую целевую сумму ${targetWinsInput}: лунки ${targetBins.map(i => i + 1).join(', ')}`);
+                        } else {
+                            console.warn(`❌ Не удалось рассчитать распределение для суммы ${targetWinsInput}`);
+                        }
                     }
                 }
             }

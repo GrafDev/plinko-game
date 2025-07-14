@@ -21,7 +21,7 @@ const baseConfig = {
     pegRestitution: 0.5,   // Коэффициент отскока гвоздиков
 
     // Добавляем в baseConfig
-    showDebugInput: false, // Показывать ли отладочный инпут для задания целевых лунок
+    showDebugInput: true, // Показывать ли отладочный инпут для задания целевых лунок
 
     // Параметры трения (friction)
     pegFriction: 0,        // Коэффициент трения гвоздиков
@@ -66,7 +66,7 @@ const baseConfig = {
 
     // Параметры для ставок и баланса
     initialBalance: 10000,      // Начальный баланс пользователя пока только для логики, тчобы потом если что применить в другом проекте.
-    ballCost: 50,            // Стоимость одного шарика
+
 
     // Значения по умолчанию, которые будут пересчитаны
     verticalSpacing: 60,  // Динамически пересчитывается в calculateVerticalSpacing()
@@ -76,8 +76,8 @@ const baseConfig = {
     targetBins: [],
     planTargetsBins: [],
     targetWins:1000,
-    maxBalls: 5,
-    costedBins: [0.5,1,2,5,10,25,50,1000],
+    maxBalls: 10,
+    costedBins: [0,1,2,5,20,50,100,500],
     // Динамически вычисляется как количество промежутков между гвоздиками последнего ряда
     binCount: 0
 };
@@ -92,11 +92,10 @@ function updateSizesBasedOnRows() {
     const screenHeight = window.innerHeight;
     const minScreenSize = Math.min(screenWidth, screenHeight);
 
-    // Рассчитываем адаптивные коэффициенты (в 20 раз меньше чем минимальный размер экрана)
-    // С минимальными и максимальными ограничениями для предотвращения экстремальных значений
-    const adaptivePegCoefficient = minScreenSize / 700;
-    const adaptiveBallCoefficient =minScreenSize / 700;
-    const adaptivSpeedCoefficient = minScreenSize / 700;
+    // Рассчитываем адаптивные коэффициенты с ограничениями для предотвращения экстремальных значений
+    const adaptivePegCoefficient = Math.max(0.7, Math.min(2.0, minScreenSize / 700));
+    const adaptiveBallCoefficient = Math.max(0.7, Math.min(2.0, minScreenSize / 700));
+    const adaptivSpeedCoefficient = Math.max(0.7, Math.min(2.0, minScreenSize / 700));
 
     console.log(`Адаптивные коэффициенты: peg=${adaptivePegCoefficient.toFixed(2)}, ball=${adaptiveBallCoefficient.toFixed(2)}, для экрана ${screenWidth}x${screenHeight}`);
 
