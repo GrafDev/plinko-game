@@ -109,9 +109,8 @@ class TargetWinsCalculator {
         let bestUniqueCount = 0; // Счетчик уникальных лунок в лучшем решении
 
         // Пробуем разные комбинации множителей
-        // Начинаем с высоких множителей для максимальных шансов попадания в сумму
-        const sortedIndices = multiplierIndices.sort((a, b) =>
-            multipliers[b] - multipliers[a]);
+        // Используем случайный порядок для более равномерного распределения
+        const sortedIndices = [...multiplierIndices].sort(() => Math.random() - 0.5);
 
         // Функция для подсчета уникальных лунок в распределении
         const countUniqueBins = (distribution) => {
@@ -222,10 +221,14 @@ class TargetWinsCalculator {
                         const usageCount = usedBins.get(j) || 0;
 
                         // Штраф за повторное использование
-                        const usagePenalty = usageCount * 10;
+                        const usagePenalty = usageCount * 20;
+                        
+                        // Дополнительный штраф за использование максимальных значений
+                        const maxMultiplier = Math.max(...multipliers);
+                        const maxValuePenalty = multiplier === maxMultiplier ? 50 : 0;
 
-                        // Вычисляем близость к требуемому значению (с учетом штрафа)
-                        const score = Math.abs(multiplier - neededPerBall) + usagePenalty;
+                        // Вычисляем близость к требуемому значению (с учетом штрафов)
+                        const score = Math.abs(multiplier - neededPerBall) + usagePenalty + maxValuePenalty;
 
                         if (score < bestScore) {
                             bestScore = score;

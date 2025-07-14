@@ -44,24 +44,19 @@ class BinsManager {
             return result;
         }
 
-        // Фиксированное распределение от центра
-        // Учитываем что крайние лунки сдваиваются: 0,1 сдвоены и последние две тоже
-        // Реальное количество уникальных значений = logicalBinCount - 2
-        const uniqueValuesCount = logicalBinCount - 2;
+        // Простое распределение от центра без сдваивания
         const distributedValues = new Array(logicalBinCount);
-        const isEven = uniqueValuesCount % 2 === 0;
-        const middle = Math.floor(uniqueValuesCount / 2);
-        
-        // Размещаем значения симметрично от центра
-        // Центральные позиции начинаются с индекса 1 (так как 0 и 1 сдвоены)
-        const centerStart = 1;
-        const centerEnd = logicalBinCount - 2; // Последние две тоже сдвоены
-        const realMiddle = Math.floor((centerStart + centerEnd) / 2);
+        const isEven = logicalBinCount % 2 === 0;
+        const middle = Math.floor(logicalBinCount / 2);
         
         // Центральная лунка получает 0
-        distributedValues[realMiddle] = costedBins[0];
-        if (uniqueValuesCount % 2 === 0) {
-            distributedValues[realMiddle + 1] = costedBins[0];
+        if (isEven) {
+            // Четное количество - две центральные лунки
+            distributedValues[middle - 1] = costedBins[0];
+            distributedValues[middle] = costedBins[0];
+        } else {
+            // Нечетное количество - одна центральная лунка
+            distributedValues[middle] = costedBins[0];
         }
         
         // Заполняем симметрично от центра
@@ -71,18 +66,18 @@ class BinsManager {
             
             let leftPos, rightPos;
             
-            if (uniqueValuesCount % 2 === 0) {
+            if (isEven) {
                 // Четное количество - две центральные лунки
-                leftPos = realMiddle - distance;
-                rightPos = realMiddle + 1 + distance;
+                leftPos = middle - 1 - distance;
+                rightPos = middle + distance;
             } else {
                 // Нечетное количество - одна центральная лунка
-                leftPos = realMiddle - distance;
-                rightPos = realMiddle + distance;
+                leftPos = middle - distance;
+                rightPos = middle + distance;
             }
             
             // Размещаем значения если они помещаются
-            if (leftPos >= centerStart && rightPos <= centerEnd) {
+            if (leftPos >= 0 && rightPos < logicalBinCount) {
                 distributedValues[leftPos] = value;
                 distributedValues[rightPos] = value;
                 valueIndex++;
@@ -91,17 +86,23 @@ class BinsManager {
             }
         }
         
-        // Сдвоенные крайние лунки получают фиксированное значение 100
-        const extremeValue = 100; // Фиксированное значение для крайних лунок
-        distributedValues[0] = extremeValue;  // Левая крайняя (сдвоена с 1)
-        distributedValues[1] = extremeValue;  // Левая крайняя (сдвоена с 0)
-        distributedValues[logicalBinCount - 2] = extremeValue; // Правая крайняя (сдвоена с последней)
-        distributedValues[logicalBinCount - 1] = extremeValue; // Правая крайняя (сдвоена с предпоследней)
-        
-        // Если лунок больше чем значений, повторяем последнее значение
+        // Если лунок больше чем значений, не используем максимальное значение
+        // Оставляем неопределенные позиции пустыми или используем предыдущее значение
         for (let i = 0; i < logicalBinCount; i++) {
             if (distributedValues[i] === undefined) {
-                distributedValues[i] = costedBins[costedBins.length - 1];
+                // Находим ближайшее определенное значение
+                let nearestValue = 0;
+                for (let j = 1; j <= Math.min(i, logicalBinCount - 1 - i); j++) {
+                    if (i - j >= 0 && distributedValues[i - j] !== undefined) {
+                        nearestValue = distributedValues[i - j];
+                        break;
+                    }
+                    if (i + j < logicalBinCount && distributedValues[i + j] !== undefined) {
+                        nearestValue = distributedValues[i + j];
+                        break;
+                    }
+                }
+                distributedValues[i] = nearestValue;
             }
         }
 
@@ -113,10 +114,9 @@ class BinsManager {
 
         const lastRowInfo = this.game.pyramidManager.getLastRowInfo();
         const logicalBinCount = lastRowInfo.pegCount - 1;
-        const actualBinCount = logicalBinCount - 2;
         config.binCount = logicalBinCount;
 
-        console.log(`Создаем лунки: логическое количество = ${logicalBinCount}, фактическое количество = ${actualBinCount}`);
+        console.log(`Создаем лунки: количество = ${logicalBinCount}`);
         console.log(`Позиции последнего ряда:`, lastRowInfo.positions);
 
         const distributedValues = this.getDistributedValues(logicalBinCount);
@@ -144,71 +144,16 @@ class BinsManager {
         binsContainer.innerHTML = '';
         this.htmlBins = [];
 
-        // Создаем корзины
-
-        // Левая сдвоенная лунка
-        const leftX1 = lastRowInfo.positions[0];
-        const rightX1 = lastRowInfo.positions[2];
-        const width1 = rightX1 - leftX1 - gapBetweenBlocks*2;
-        const centerX1 = (leftX1 + rightX1) / 2;
-        const binColor1 = this.getBinColor(0, logicalBinCount);
-        const multiplier1 = distributedValues[0];
-
-        // Создаем физический объект для левой корзины
-        const leftBlock = Bodies.rectangle(
-            centerX1,
-            binTopY + blockHeight/2,
-            width1,
-            blockHeight,
-            {
-                isStatic: true,
-                render: {
-                    fillStyle: 'transparent', // Невидимый объект
-                    lineWidth: 0,
-                    strokeStyle: 'transparent'
-                },
-                label: `bin_0`,
-                isSensor: false,
-                chamfer: { radius: 4 },
-                friction: config.blockFriction,
-                multiplier: multiplier1,
-                logicalBinIndex: 0,
-                collisionFilter: {
-                    category: 0x0008,
-                    mask: 0xFFFFFFFF
-                }
-            }
-        );
-
-        physicalBins.push(leftBlock);
-        World.add(this.world, leftBlock);
-        this.blockAnimations[`bin_0`] = {
-            originalColor: binColor1,
-            isAnimating: false
-        };
-
-        // Создаем HTML-элемент для левой корзины
-        const leftBinElement = document.createElement('div');
-        leftBinElement.className = 'bin';
-        leftBinElement.dataset.binIndex = '0';
-        leftBinElement.style.backgroundColor = binColor1;
-        leftBinElement.innerHTML = `<span class="bin-label-new">$${multiplier1}</span>`;
-        binsContainer.appendChild(leftBinElement);
-        this.htmlBins.push(leftBinElement);
-
-        // Средние лунки
-        for (let i = 1; i < actualBinCount - 1; i++) {
-            const adjustedIndex = i + 1;
-
-            const leftX = lastRowInfo.positions[adjustedIndex];
-            const rightX = lastRowInfo.positions[adjustedIndex + 1];
+        // Создаем все лунки одинаково
+        for (let i = 0; i < logicalBinCount; i++) {
+            const leftX = lastRowInfo.positions[i];
+            const rightX = lastRowInfo.positions[i + 1];
             const width = rightX - leftX - gapBetweenBlocks;
             const centerX = (leftX + rightX) / 2;
-            const binColor = this.getBinColor(adjustedIndex, logicalBinCount);
+            const binColor = this.getBinColor(i, logicalBinCount);
+            const multiplier = distributedValues[i];
 
-            const multiplier = distributedValues[adjustedIndex];
-
-            // Создаем физический объект для средней корзины
+            // Создаем физический объект для корзины
             const block = Bodies.rectangle(
                 centerX,
                 binTopY + blockHeight/2,
@@ -226,7 +171,7 @@ class BinsManager {
                     chamfer: { radius: 4 },
                     friction: config.blockFriction,
                     multiplier: multiplier,
-                    logicalBinIndex: adjustedIndex,
+                    logicalBinIndex: i,
                     collisionFilter: {
                         category: 0x0008,
                         mask: 0xFFFFFFFF
@@ -241,71 +186,15 @@ class BinsManager {
                 isAnimating: false
             };
 
-            // Создаем HTML-элемент для средней корзины
+            // Создаем HTML-элемент для корзины
             const binElement = document.createElement('div');
             binElement.className = 'bin';
-            binElement.dataset.binIndex = adjustedIndex.toString();
+            binElement.dataset.binIndex = i.toString();
             binElement.style.backgroundColor = binColor;
             binElement.innerHTML = `<span class="bin-label-new">$${multiplier}</span>`;
             binsContainer.appendChild(binElement);
             this.htmlBins.push(binElement);
         }
-
-        // Правая сдвоенная лунка
-        const posLength = lastRowInfo.positions.length;
-        const rightBinIdx = Math.min(logicalBinCount, posLength - 1);
-        const leftX2 = lastRowInfo.positions[rightBinIdx - 2] || lastRowInfo.positions[posLength - 3];
-        const rightX2 = lastRowInfo.positions[rightBinIdx] || lastRowInfo.positions[posLength - 1];
-
-        console.log(`Позиции правой лунки: leftX2=${leftX2}, rightX2=${rightX2}, rightBinIdx=${rightBinIdx}, logicalBinCount=${logicalBinCount}`);
-
-        const width2 = rightX2 - leftX2 - gapBetweenBlocks;
-        const centerX2 = (leftX2 + rightX2) / 2;
-        const binColor2 = this.getBinColor(logicalBinCount - 2, logicalBinCount);
-
-        const multiplier2 = distributedValues[logicalBinCount - 1];
-
-        // Создаем физический объект для правой корзины
-        const rightBlock = Bodies.rectangle(
-            centerX2,
-            binTopY + blockHeight/2,
-            width2,
-            blockHeight,
-            {
-                isStatic: true,
-                render: {
-                    fillStyle: 'transparent', // Невидимый объект
-                    lineWidth: 0,
-                    strokeStyle: 'transparent'
-                },
-                label: `bin_${actualBinCount - 1}`,
-                isSensor: false,
-                chamfer: { radius: 4 },
-                friction: config.blockFriction,
-                multiplier: multiplier2,
-                logicalBinIndex: logicalBinCount - 1,
-                collisionFilter: {
-                    category: 0x0008,
-                    mask: 0xFFFFFFFF
-                }
-            }
-        );
-
-        physicalBins.push(rightBlock);
-        World.add(this.world, rightBlock);
-        this.blockAnimations[`bin_${actualBinCount - 1}`] = {
-            originalColor: binColor2,
-            isAnimating: false
-        };
-
-        // Создаем HTML-элемент для правой корзины
-        const rightBinElement = document.createElement('div');
-        rightBinElement.className = 'bin';
-        rightBinElement.dataset.binIndex = (logicalBinCount - 1).toString();
-        rightBinElement.style.backgroundColor = binColor2;
-        rightBinElement.innerHTML = `<span class="bin-label-new">$${multiplier2}</span>`;
-        binsContainer.appendChild(rightBinElement);
-        this.htmlBins.push(rightBinElement);
 
         // Пол
         const floor = Bodies.rectangle(
@@ -331,7 +220,7 @@ class BinsManager {
 
         this.bins = physicalBins;
 
-        // console.log(`Создано ${this.bins.length - 1} лунок (+ пол)`);
+        console.log(`Создано ${logicalBinCount} лунок (+ пол)`);
     }
 
     logBinHit(binIndex) {
@@ -344,40 +233,19 @@ class BinsManager {
     animateBlockFlash(binIndex) {
         this.logBinHit(binIndex);
 
-        let blockId;
-        const logicalBinCount = config.binCount;
+        const blockId = `bin_${binIndex}`;
 
-        // Определяем какая корзина должна анимироваться
-        if (binIndex <= 1) {
-            blockId = `bin_0`;
-            // console.log(`Анимация левой двойной лунки для индекса ${binIndex}`);
-        } else if (binIndex >= logicalBinCount - 2) {
-            const actualBinCount = logicalBinCount - 2;
-            blockId = `bin_${actualBinCount - 1}`;
-            // console.log(`Анимация правой двойной лунки для индекса ${binIndex}, блок: ${blockId}, actualBinCount: ${actualBinCount}`);
-        } else {
-            blockId = `bin_${binIndex - 1}`;
-            // console.log(`Анимация обычной лунки для индекса ${binIndex}, блок: ${blockId}`);
-        }
-
-        // Находим соответствующий HTML-элемент корзины
         // Находим соответствующий HTML-элемент корзины
         let htmlBin = null;
         for (const bin of this.htmlBins) {
             const binIndexFromDataset = parseInt(bin.dataset.binIndex);
-            if (binIndexFromDataset === binIndex ||
-                (binIndex === 1 && binIndexFromDataset === 0) ||
-                (binIndex === logicalBinCount - 2 && binIndexFromDataset === logicalBinCount - 1)) {
+            if (binIndexFromDataset === binIndex) {
                 htmlBin = bin;
                 break;
             }
         }
 
         if (htmlBin) {
-            // Анимируем HTML-элемент
-            const originalBackgroundColor = htmlBin.style.backgroundColor;
-            const originalPosition = parseInt(htmlBin.style.top || '0');
-
             // Добавляем класс для анимации вспышки
             htmlBin.classList.add('bin-flash');
 
@@ -425,14 +293,7 @@ class BinsManager {
     getMultiplier(binIndex) {
         const logicalBinCount = config.binCount;
         const distributedValues = this.getDistributedValues(logicalBinCount);
-
-        if (binIndex === 0 || binIndex === 1) {
-            return distributedValues[0];
-        } else if (binIndex >= logicalBinCount - 2) {
-            return distributedValues[logicalBinCount - 1];
-        } else {
-            return distributedValues[binIndex];
-        }
+        return distributedValues[binIndex];
     }
 
     clearBins() {

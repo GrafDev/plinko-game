@@ -56,10 +56,7 @@
     transition: all 0.3s ease;
 }
 
-/* Стиль для крайних корзин (первая и последняя) */
-.bin:first-child, .bin:last-child {
-    flex: 2.2; /* Двойная ширина для крайних корзин */
-}
+/* Все корзины одинаковой ширины */
 
 .bin-label-new {
     color: black;

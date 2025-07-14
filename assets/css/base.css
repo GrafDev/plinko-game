@@ -244,6 +244,8 @@
     .sliders-container {
         height: auto;
         padding: 2px;
+        width: 100%;
+        max-width: 100%;
     }
 
     .slider {
@@ -316,7 +318,8 @@
 
     .sliders-container {
         height: auto;
-        width: 40%;
+        width: 100%;
+        max-width: 100%;
         padding: 20px;
         margin-bottom: 10px;
     }

@@ -7,7 +7,7 @@ class UIManager {
     constructor(gameInstance) {
         this.game = gameInstance;
 
-        this.ballCount = config.maxBalls || 5;
+        this.ballCount = config.maxBalls || 10;
         this.maxBallCount = config.maxBalls || 10;
 
         // Устанавливаем начальный баланс, гарантируя, что он не отрицательный
@@ -15,7 +15,7 @@ class UIManager {
         this.ballCost = config.ballCost || 10;
 
         // Добавляем поля для количества бросков (шаров) и выигрышей
-        this.throwsLeft = config.maxBalls || 5; // Количество оставшихся шаров
+        this.throwsLeft = config.maxBalls || 10; // Количество оставшихся шаров
         this.winsAmount = 0;
 
         // Флаг для отслеживания первого броска
@@ -353,6 +353,7 @@ class UIManager {
 
         const debugContainer = document.createElement('div');
         debugContainer.className = 'debug-input-container';
+        debugContainer.style.display = 'block';
 
         const debugInput = document.createElement('input');
         debugInput.type = 'text';
@@ -361,7 +362,11 @@ class UIManager {
         
         // Рассчитываем максимально возможную сумму
         const maxPossibleSum = this.calculateMaxPossibleSum();
-        debugInput.placeholder = `Целевая сумма выигрыша (макс: ${maxPossibleSum})`;
+        
+        // Генерируем любое случайное число от 0 до максимума
+        const randomValue = Math.floor(Math.random() * maxPossibleSum);
+        
+        debugInput.placeholder = `Target win sum (now ${randomValue}, max: ${maxPossibleSum})`;
 
         debugContainer.appendChild(debugInput);
 
@@ -369,17 +374,111 @@ class UIManager {
         if (binsContainer && binsContainer.parentNode) {
             binsContainer.parentNode.insertBefore(debugContainer, binsContainer.nextSibling);
         }
+
+        // Создаем элемент для отображения результата под полем
+        const resultDisplay = document.createElement('div');
+        resultDisplay.className = 'target-result-display';
+        resultDisplay.style.cssText = `
+            margin-top: 5px;
+            font-size: 18px;
+            color: white;
+            min-height: 20px;
+            font-weight: bold;
+        `;
+        
+        debugContainer.appendChild(resultDisplay);
+
+        // Сохраняем ссылки
+        this.debugInput = debugInput;
+        this.resultDisplay = resultDisplay;
     }
 
     // Функция для расчета максимально возможной суммы выигрыша
     calculateMaxPossibleSum() {
-        // Получаем максимальное значение из config.costedBins
-        const maxBinValue = Math.max(...config.costedBins);
+        // Рассчитываем реальное количество лунок для текущего количества рядов
+        const actualBinCount = config.rows + 1; // Количество лунок = количество рядов + 1
+        const realAvailableValues = this.game.binsManager.getDistributedValues(actualBinCount);
+        const maxBinValue = Math.max(...realAvailableValues);
         
         // Умножаем на количество шариков
         const maxPossibleSum = maxBinValue * this.ballCount;
         
+        
         return maxPossibleSum;
+    }
+
+    // Функция для генерации реальной рандомной суммы
+    generateRandomRealSum() {
+        // Получаем реальные значения лунок
+        const binCount = config.binCount || 17;
+        const realAvailableValues = this.game.binsManager.getDistributedValues(binCount);
+        
+        // Генерируем рандомную комбинацию из ballCount шариков
+        let totalSum = 0;
+        for (let i = 0; i < this.ballCount; i++) {
+            const randomBinIndex = Math.floor(Math.random() * realAvailableValues.length);
+            totalSum += realAvailableValues[randomBinIndex];
+        }
+        
+        return totalSum;
+    }
+
+    // Функция проверки возможности достижения целевой суммы
+    isTargetSumAchievable(targetSum, ballCount = this.ballCount) {
+        // Получаем доступные значения для текущего количества рядов
+        const actualBinCount = config.rows + 1;
+        const availableValues = this.game.binsManager.getDistributedValues(actualBinCount);
+        
+        // Проверяем минимальную и максимальную возможные суммы
+        const minSum = Math.min(...availableValues) * ballCount;
+        const maxSum = Math.max(...availableValues) * ballCount;
+        
+        if (targetSum < minSum || targetSum > maxSum) {
+            return false;
+        }
+        
+        // Используем динамическое программирование для проверки возможности набрать точную сумму
+        const dp = new Array(targetSum + 1).fill(false);
+        dp[0] = true;
+        
+        for (let ball = 1; ball <= ballCount; ball++) {
+            const newDp = new Array(targetSum + 1).fill(false);
+            for (let sum = 0; sum <= targetSum; sum++) {
+                if (dp[sum]) {
+                    for (const value of availableValues) {
+                        if (sum + value <= targetSum) {
+                            newDp[sum + value] = true;
+                        }
+                    }
+                }
+            }
+            Object.assign(dp, newDp);
+        }
+        
+        return dp[targetSum];
+    }
+
+    // Функция для генерации альтернативного достижимого значения
+    suggestAlternativeTarget(originalTarget, ballCount = this.ballCount) {
+        const actualBinCount = config.rows + 1;
+        const availableValues = this.game.binsManager.getDistributedValues(actualBinCount);
+        const maxPossibleSum = Math.max(...availableValues) * ballCount;
+        
+        // Ищем ближайшее достижимое значение
+        let bestAlternative = 0;
+        let minDiff = Infinity;
+        
+        for (let target = 1; target <= maxPossibleSum; target++) {
+            if (this.isTargetSumAchievable(target, ballCount)) {
+                const diff = Math.abs(target - originalTarget);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    bestAlternative = target;
+                }
+            }
+        }
+        
+        return bestAlternative;
     }
 
     // Функция для обновления placeholder в debug input
@@ -387,7 +486,11 @@ class UIManager {
         const debugInput = document.getElementById('debug-target-bins');
         if (debugInput) {
             const maxPossibleSum = this.calculateMaxPossibleSum();
-            debugInput.placeholder = `Целевая сумма выигрыша (макс: ${maxPossibleSum})`;
+            
+            // Генерируем любое случайное число от 0 до максимума
+            const randomValue = Math.floor(Math.random() * maxPossibleSum);
+            
+            debugInput.placeholder = `Target win sum (now ${randomValue}, max: ${maxPossibleSum})`;
         }
     }
 
@@ -415,6 +518,7 @@ class UIManager {
             console.log('====== НАЖАТА КНОПКА СТАВКИ ======');
             console.log('Время нажатия:', new Date().toISOString());
             console.log('Выбрано шариков:', self.ballCount);
+
 
             if (self.throwsLeft <= 0) {
                 console.log('У пользователя закончились шары');
@@ -466,6 +570,9 @@ class UIManager {
             self.throwsLeft -= self.ballCount;
             self.throwsLeft = Math.max(0, self.throwsLeft);
             self.balance -= betCost;
+            
+            // НЕ изменяем ballCount автоматически! Пользователь сам выбирает количество слайдером
+            
             self.updateThrowsAndWins();
 
             console.log(`Сделана ставка: ${betCost} (${self.ballCount} шариков по ${self.ballCost})`);
@@ -473,12 +580,18 @@ class UIManager {
             console.log(`Осталось шаров: ${self.throwsLeft}`);
 
             let targetBins = null;
+            // Сохраняем target значение для отображения в wins
+            self.lastTargetValue = undefined;
+            self.lastResultValue = undefined;
+            
             if (config.showDebugInput) {
                 const debugInput = document.getElementById('debug-target-bins');
                 if (debugInput && debugInput.value.trim()) {
                     const targetWinsInput = parseInt(debugInput.value.trim(), 10);
                     
                     if (!isNaN(targetWinsInput) && targetWinsInput > 0) {
+                        // Сохраняем target значение
+                        self.lastTargetValue = targetWinsInput;
                         console.log(`🎯 Попытка рассчитать распределение для целевой суммы: ${targetWinsInput}`);
                         
                         // Получаем реальные доступные значения из BinsManager
@@ -667,6 +780,11 @@ class UIManager {
                 self.game.placeBet(self.ballCount);
             }
 
+            // Показываем результат под полем ввода
+            if (self.lastTargetValue !== undefined) {
+                self.showTargetResult();
+            }
+
             if (self.throwsLeft <= 0) {
                 this.disabled = true;
                 this.style.opacity = '0.5';
@@ -698,9 +816,47 @@ class UIManager {
         return active > 0;
     }
 
+    // Метод для показа результата под полем ввода
+    showTargetResult() {
+        if (!this.resultDisplay || this.lastTargetValue === undefined) return;
+        
+        const currentResult = this.lastResultValue || 'Ожидаем результат...';
+        let statusText = '';
+        
+        if (this.lastResultValue !== undefined) {
+            if (this.lastTargetValue === this.lastResultValue) {
+                statusText = ' ✓ Target достигнут!';
+            } else {
+                statusText = ' ✗ Target недостижим';
+            }
+        }
+        
+        this.resultDisplay.innerHTML = `Target: ${this.lastTargetValue}, Result: ${currentResult}${statusText}`;
+        
+        // Обновляем результат когда он станет доступен
+        if (this.lastResultValue === undefined) {
+            const checkResult = () => {
+                if (this.lastResultValue !== undefined) {
+                    this.showTargetResult(); // Рекурсивно обновляем отображение
+                } else {
+                    setTimeout(checkResult, 100); // Проверяем каждые 100мс
+                }
+            };
+            setTimeout(checkResult, 100);
+        }
+    }
+
     // Метод для добавления выигрыша
     addWin(amount) {
         this.winsAmount += amount;
+        
+        // Обновляем result как общий winsAmount для сравнения с target
+        if (this.lastTargetValue !== undefined) {
+            this.lastResultValue = this.winsAmount;
+            // Обновляем отображение результата
+            this.showTargetResult();
+        }
+        
         // Обновляем отображение баланса под капотом
         this.balance += amount;
         this.updateThrowsAndWins();
@@ -740,15 +896,19 @@ class UIManager {
 
             // Для слайдера выбора шаров обновляем максимальное значение
             if (slider === this.ballsSlider) {
-                // Устанавливаем максимальное значение равным количеству оставшихся шаров
-                // (но не меньше 1, чтобы слайдер не сломался)
-                const maxBalls = Math.max(1, this.throwsLeft);
-                slider.max = maxBalls.toString();
+                // Максимальное значение слайдера всегда равно maxBallCount (инвертированный слайдер)
+                slider.max = this.maxBallCount.toString();
 
                 // Если текущее значение больше максимального, корректируем его
                 if (this.ballCount > this.throwsLeft) {
                     this.ballCount = this.throwsLeft;
-                    slider.value = this.ballCount.toString();
+                    // Обновляем значение слайдера с учетом инверсии
+                    slider.value = (this.maxBallCount - this.ballCount + 1).toString();
+                    // Обновляем отображение значения
+                    const ballsValue = slider.parentElement.querySelector('.slider-value');
+                    if (ballsValue) {
+                        ballsValue.textContent = this.ballCount;
+                    }
                 }
 
                 // Если шаров не осталось, блокируем слайдер

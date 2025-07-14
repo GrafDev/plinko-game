@@ -77,7 +77,7 @@ const baseConfig = {
     planTargetsBins: [],
     targetWins:1000,
     maxBalls: 10,
-    costedBins: [0,1,2,5,20,50,100,500],
+    costedBins: [0,1,2,5,20,50,100,500,1000],
     // Динамически вычисляется как количество промежутков между гвоздиками последнего ряда
     binCount: 0
 };
