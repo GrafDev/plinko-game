@@ -600,27 +600,22 @@ class UIManager {
         // Функция для перемещения wins в зависимости от размера экрана
         const moveWins = () => {
             const winsContainer = document.getElementById('wins-container');
-            const gameControls = document.querySelector('.game-controls');
-            const plinkoField = document.querySelector('.plinko-field');
+            const gameHeader = document.querySelector('.game-header');
+            const mainContainer = document.querySelector('.main-container');
             
-            if (!winsContainer || !gameControls || !plinkoField) {
+            if (!winsContainer || !gameHeader || !mainContainer) {
                 return;
             }
 
-            if (window.innerWidth >= 768) {
-                // Для планшетов и десктопов - перемещаем wins в game-controls
-                if (winsContainer.parentNode !== gameControls) {
-                    gameControls.insertBefore(winsContainer, gameControls.firstChild);
+            if (window.innerWidth <= 1024) {
+                // Для мобильных и планшетов - wins в game-header под логотипом
+                if (winsContainer.parentNode !== gameHeader) {
+                    gameHeader.appendChild(winsContainer);
                 }
             } else {
-                // Для мобильных - оставляем в plinko-field
-                if (winsContainer.parentNode !== plinkoField) {
-                    // Находим правильное место - после plinko-game, но перед bins-container
-                    const plinkoGame = document.getElementById('plinko-game');
-                    const binsContainer = document.getElementById('bins-container');
-                    if (plinkoGame && binsContainer) {
-                        plinkoField.insertBefore(winsContainer, binsContainer);
-                    }
+                // Для десктопов - wins в абсолютном позиционировании
+                if (winsContainer.parentNode !== mainContainer) {
+                    mainContainer.appendChild(winsContainer);
                 }
             }
         };
@@ -642,13 +637,15 @@ class UIManager {
             const betButton = document.getElementById('bet-button');
             const gameHeader = document.querySelector('.game-header');
             const gameControls = document.querySelector('.game-controls');
+            const plinkoField = document.querySelector('.plinko-field');
+            const plinkoGame = document.getElementById('plinko-game');
             
-            if (!slidersContainer || !betButton || !gameHeader || !gameControls) {
+            if (!slidersContainer || !betButton || !gameHeader || !gameControls || !plinkoField || !plinkoGame) {
                 return;
             }
 
-            if (window.innerWidth >= 768) {
-                // Для планшетов и десктопов - перемещаем слайдеры и кнопку в game-header
+            if (window.innerWidth > 1024) {
+                // Для больших экранов - перемещаем слайдеры и кнопку в game-header
                 if (slidersContainer.parentNode !== gameHeader) {
                     gameHeader.appendChild(slidersContainer);
                 }
@@ -656,12 +653,27 @@ class UIManager {
                     gameHeader.appendChild(betButton);
                 }
             } else {
-                // Для мобильных - оставляем в game-controls
+                // Для экранов ≤1024px - перемещаем game-controls под plinko-game
+                if (gameControls.parentNode !== plinkoField) {
+                    // Вставляем game-controls после plinko-game
+                    plinkoGame.insertAdjacentElement('afterend', gameControls);
+                }
+                
+                // Убеждаемся, что слайдеры в game-controls
                 if (slidersContainer.parentNode !== gameControls) {
                     gameControls.appendChild(slidersContainer);
                 }
-                if (betButton.parentNode !== gameControls) {
-                    gameControls.appendChild(betButton);
+                
+                // Перемещаем bet внутрь sliders-container между слайдерами
+                if (betButton.parentNode !== slidersContainer) {
+                    const sliderContainers = slidersContainer.querySelectorAll('.slider-container');
+                    if (sliderContainers.length >= 2) {
+                        // Вставляем bet между первым и вторым слайдером
+                        sliderContainers[1].insertAdjacentElement('beforebegin', betButton);
+                    } else {
+                        // Если слайдеров меньше 2, просто добавляем в конец
+                        slidersContainer.appendChild(betButton);
+                    }
                 }
             }
         };

@@ -24,13 +24,20 @@
 
 /* Контейнер для отображения выигрышей */
 #wins-container {
+    /* По умолчанию для десктопов - абсолютное позиционирование */
     position: absolute;
     top: 20px;
     left: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
     z-index: 1000;
+}
+
+/* Для мобильных и планшетов - wins в потоке header */
+@media (max-width: 1024px) {
+    #wins-container {
+        position: static;
+        order: 2; /* Под логотипом */
+        z-index: auto;
+    }
 }
 
 /* Стили для отображения выигрыша */
@@ -296,21 +303,140 @@
     transform: none;
 }
 
-/* Медиа-запросы для адаптивности */
-@media (max-width: 768px) {
+/* Медиа-запросы для экранов ≤1024px */
+@media (max-width: 1024px) {
     .money-bet-container {
         top: 10px;
         right: 10px;
     }
 
-    #wins-container {
-        top: 10px;
-        left: 10px;
-    }
 
     .balance-display, #wins-display {
         padding: 6px 10px;
         font-size: var(--font-size-sm);
         margin-bottom: 5px;
+    }
+
+    /* game-controls размещается под plinko-game */
+    .game-controls {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 5px; /* padding-x = 5px для мобильных */
+        gap: 20px;
+        width: 100%;
+        order: 1; /* Убеждаемся, что controls идут после plinko-game */
+    }
+
+    /* Горизонтальные слайдеры для мобильных и планшетов */
+    .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        width: 150px;
+        margin: 0;
+        justify-content: center;
+    }
+
+    .sliders-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        height: auto;
+        margin: 0;
+        gap: 20px;
+    }
+
+    /* Горизонтальные слайдеры */
+    .slider {
+        width: 120px;
+        height: 15px;
+        margin: 10px 0;
+        writing-mode: initial;
+        -webkit-appearance: none;
+        transform: none;
+    }
+
+    .slider::-webkit-slider-runnable-track {
+        width: 120px;
+        height: 15px;
+        background: #828385;
+        border-radius: 7px;
+        border: none;
+    }
+
+    .slider::-moz-range-track {
+        width: 120px;
+        height: 15px;
+        background: #828385;
+        border-radius: 7px;
+        border: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 30px;
+        height: 30px;
+        background: var(--color-green);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        margin-top: -7.5px;
+        border: 2px solid #ffffff;
+    }
+
+    .slider::-moz-range-thumb {
+        width: 30px;
+        height: 30px;
+        background: var(--color-green);
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .slider:active::-webkit-slider-thumb {
+        background: var(--color-dark-green);
+        transform: scale(1.1);
+    }
+
+    .slider:active::-moz-range-thumb {
+        background: var(--color-dark-green);
+        transform: scale(1.1);
+    }
+
+    .slider:hover::-webkit-slider-thumb {
+        background: var(--color-dark-green);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .slider:hover::-moz-range-thumb {
+        background: var(--color-dark-green);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Лейблы для горизонтальных слайдеров */
+    .slider-label {
+        margin-top: 0;
+        margin-bottom: 5px;
+        font-size: var(--font-size-xs);
+    }
+
+    .slider-value {
+        margin-top: 5px;
+        font-size: var(--font-size-sm);
+    }
+
+    /* Кнопка bet между слайдерами */
+    .bet-button {
+        width: 60px;
+        height: 60px;
+        font-size: var(--font-size-md);
+        margin: 0 10px; /* Боковые отступы для разделения от слайдеров */
     }
 }
