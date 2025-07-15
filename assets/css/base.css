@@ -28,7 +28,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 20px 0 20px;
     height: fit-content;
     background-color: var(--color-dark-blue);
     z-index: 10;
@@ -85,7 +85,7 @@
 
 /* Стили для нижней панели с элементами управления */
 .game-controls {
-    padding: 15px;
+    padding: 0 15px;
     background-color: var(--color-dark-blue);
     display: flex;
     justify-content: center;
@@ -202,14 +202,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 20px 20px;
+        padding: 10px 20px 0 20px;
         height: auto;
         min-height: 80px;
-        gap: 15px; /* Отступ между элементами */
+        gap: 0; /* Убираем отступ между элементами */
     }
 
     .game-header img {
-        max-width: 50%;
+        max-width: 40%;
         order: 1; /* Логотип первым */
     }
 
@@ -230,8 +230,7 @@
 
     .game-controls {
         flex-direction: column;
-        padding: 20px 10px 20px 10px;
-
+        padding: 0 10px;
         width: 100%;
     }
 
@@ -306,7 +305,7 @@
     }
 
     .game-controls {
-        padding: 15px;
+        padding: 0 15px;
         width: 100%;
     }
 

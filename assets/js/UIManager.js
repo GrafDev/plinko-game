@@ -36,6 +36,9 @@ class UIManager {
 
         // Добавляем индекс для отслеживания позиции в planTargetsBins
         this.planTargetBinsIndex = 0;
+        
+        // Флаг для отслеживания состояния клавиатуры
+        this.isKeyboardOpen = false;
     }
 
     // Метод для обновления отображения оставшихся шаров с учетом текущего выбора
@@ -57,6 +60,7 @@ class UIManager {
         this.setupBetButton();
         this.setupResponsiveWins(); // Добавляем адаптивность для wins
         this.setupResponsiveSliders(); // Добавляем адаптивность для слайдеров
+        this.setupKeyboardDetection(); // Добавляем отслеживание клавиатуры
 
         // Инициализируем менеджер модального окна
         this.winModalManager = new WinModalManager(this.game);
@@ -542,11 +546,13 @@ class UIManager {
             }
 
             self.isGameActive = true;
+            self.updateBetButtonState();
             self.disableAllSliders();
 
             let checkInterval = setInterval(() => {
                 if (self.game.physicsManager && self.game.physicsManager.getActiveBallsCount() === 0) {
                     self.isGameActive = false;
+                    self.updateBetButtonState();
                     self.enableSlidersAfterGame();
                     console.log('Игра завершена, слайдеры обновлены (интервал)');
                     clearInterval(checkInterval);
@@ -557,6 +563,7 @@ class UIManager {
             if (self.game.gameLogic) {
                 self.game.gameLogic.on('gameFinished', function handleGameFinished() {
                     self.isGameActive = false;
+                    self.updateBetButtonState();
                     self.enableSlidersAfterGame();
                     console.log('Игра завершена, слайдеры обновлены (событие)');
                     if (checkInterval) {
@@ -942,6 +949,68 @@ class UIManager {
         }
 
         console.log('Слайдеры обновлены после завершения игры');
+    }
+
+    // Метод для настройки отслеживания клавиатуры
+    setupKeyboardDetection() {
+        // Только для мобильных устройств
+        if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return;
+        }
+
+        const originalViewportHeight = window.innerHeight;
+        let resizeTimeout;
+
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const currentViewportHeight = window.innerHeight;
+                const heightDifference = originalViewportHeight - currentViewportHeight;
+                
+                // Если высота экрана уменьшилась более чем на 150px, считаем что клавиатура открыта
+                this.isKeyboardOpen = heightDifference > 150;
+                
+                this.updateBetButtonState();
+                
+                console.log('Keyboard detection:', this.isKeyboardOpen ? 'открыта' : 'закрыта');
+            }, 100);
+        };
+
+        window.addEventListener('resize', handleResize);
+        
+        // Также отслеживаем события фокуса на input полях
+        const debugInput = document.getElementById('debug-target-bins');
+        if (debugInput) {
+            debugInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    this.isKeyboardOpen = true;
+                    this.updateBetButtonState();
+                }, 300);
+            });
+            
+            debugInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    this.isKeyboardOpen = false;
+                    this.updateBetButtonState();
+                }, 300);
+            });
+        }
+    }
+
+    // Метод для обновления состояния кнопки bet
+    updateBetButtonState() {
+        const betButton = document.getElementById('bet-button');
+        if (!betButton) return;
+
+        const shouldDisable = this.isKeyboardOpen || this.isGameActive || this.throwsLeft <= 0;
+        
+        if (shouldDisable) {
+            betButton.disabled = true;
+            betButton.classList.add('bet-button-disabled');
+        } else {
+            betButton.disabled = false;
+            betButton.classList.remove('bet-button-disabled');
+        }
     }
 
     resetPlanTargetBinsIndex() {
